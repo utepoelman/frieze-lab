@@ -169,6 +169,11 @@
       color: var(--purple);
     }
 
+    .badge.danger {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
     /* Controls & Buttons */
     .control-row {
       display: flex;
@@ -222,9 +227,14 @@
       transition: all 0.15s ease;
     }
 
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       background: var(--surface-alt);
       border-color: #b8c4d6;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .btn.primary {
@@ -233,7 +243,7 @@
       border-color: var(--primary);
     }
 
-    .btn.primary:hover {
+    .btn.primary:hover:not(:disabled) {
       background: var(--primary-dark);
     }
 
@@ -243,7 +253,7 @@
       border-color: var(--accent);
     }
 
-    .btn.accent:hover {
+    .btn.accent:hover:not(:disabled) {
       background: #be123c;
     }
 
@@ -253,7 +263,7 @@
       border-color: var(--success);
     }
 
-    .btn.success:hover {
+    .btn.success:hover:not(:disabled) {
       background: #047857;
     }
 
@@ -263,7 +273,7 @@
       border-color: var(--purple);
     }
 
-    .btn.purple:hover {
+    .btn.purple:hover:not(:disabled) {
       background: #6d28d9;
     }
 
@@ -382,6 +392,11 @@
 
     .canvas-stage.crosshair {
       cursor: crosshair;
+    }
+
+    .canvas-stage.quad-mode {
+      cursor: default;
+      background: #0f172a;
     }
 
     canvas {
@@ -1027,7 +1042,7 @@
 
       <div class="control-row">
         <div class="control-group">
-          <label for="friezePhotoUpload">Upload Frieze Photo (Guided 3-Step Setup)</label>
+          <label for="friezePhotoUpload">Upload Frieze Photo (Guided 4-Step Setup)</label>
           <input type="file" id="friezePhotoUpload" accept="image/*" />
         </div>
 
@@ -1080,25 +1095,41 @@
         <div id="savedPatternsGrid" class="saved-grid"></div>
       </div>
 
-      <!-- GUIDED 3-STEP PHOTO CALIBRATION WIZARD -->
+      <!-- GUIDED 4-STEP PHOTO CALIBRATION WIZARD -->
       <div id="photoCalibrationWizard" class="calibration-wizard">
         <div class="wizard-steps">
-          <button class="w-step active" data-calstep="straighten">Step A: Straighten Photo</button>
-          <button class="w-step" data-calstep="midline">Step B: Find Middle Line</button>
-          <button class="w-step" data-calstep="period">Step C: Find Repeat Length L</button>
-          <button class="w-step" data-calstep="analyze">Step D: Analyse Symmetries</button>
+          <button class="w-step active" data-calstep="perspective">1. Perspective Quad</button>
+          <button class="w-step" data-calstep="straighten">2. Straighten Photo</button>
+          <button class="w-step" data-calstep="midline">3. Find Middle Line</button>
+          <button class="w-step" data-calstep="period">4. Find Repeat Length L</button>
+          <button class="w-step" data-calstep="analyze">5. Analyse Symmetries</button>
         </div>
 
-        <!-- Step A Controls -->
-        <div id="calStepStraighten" class="wizard-body">
+        <!-- Step 1 Controls: Perspective Quadrilateral Selection -->
+        <div id="calStepPerspective" class="wizard-body">
           <div class="wizard-instructions">
-            <h3>Step A: Straighten Your Frieze Photo (Optional)</h3>
-            <p>Adjust the tilt angle until the frieze band runs horizontally along the blue guide lines—or click <strong>"2-Point Level"</strong> and click two points along a horizontal edge of your frieze.</p>
+            <h3>Step 1: Select Quadrilateral to Correct Perspective</h3>
+            <p>Taken from the side at an angle? <strong>Drag the 4 corners</strong> (or drag any edge) onto the converging boundaries of your frieze pattern so the grid lines follow the strip. It will be unwarped into a true rectangle.</p>
           </div>
           <div class="wizard-controls">
+            <span id="quadInvalidBadge" class="badge danger" style="display:none;">&#9888; Uncross corners</span>
+            <button class="btn sm" id="quadResetBtn" title="Reset quadrilateral to inset box">Reset Quad</button>
+            <button class="btn sm" id="quadFullBtn" title="Snap corners to full image edges">Full Image</button>
+            <button class="btn primary" id="toStraightenStepBtn">Next: Unwarp &amp; Straighten &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Step 2 Controls -->
+        <div id="calStepStraighten" class="wizard-body" style="display:none;">
+          <div class="wizard-instructions">
+            <h3>Step 2: Fine-Tune Horizontal Alignment (Optional)</h3>
+            <p>Your quadrilateral has been unwarped into a rectangle! Adjust the tilt angle if needed, or click <strong>"2-Point Level"</strong> and click two points along a horizontal edge.</p>
+          </div>
+          <div class="wizard-controls">
+            <button class="btn sm" id="backToQuadBtn">&larr; Quad</button>
             <label style="font-size:0.81rem; font-weight:600;">
               Angle: <span id="straightenAngleVal">0.0&deg;</span>
-              <input type="range" id="straightenAngleSlider" min="-20" max="20" step="0.1" value="0" style="width:125px; vertical-align:middle;" />
+              <input type="range" id="straightenAngleSlider" min="-20" max="20" step="0.1" value="0" style="width:120px; vertical-align:middle;" />
             </label>
             <button class="btn sm" id="straightenMinusBtn">-0.2&deg;</button>
             <button class="btn sm" id="straightenPlusBtn">+0.2&deg;</button>
@@ -1108,10 +1139,10 @@
           </div>
         </div>
 
-        <!-- Step B Controls -->
+        <!-- Step 3 Controls -->
         <div id="calStepMidline" class="wizard-body" style="display:none;">
           <div class="wizard-instructions">
-            <h3>Step B: Identify the Horizontal Middle Line</h3>
+            <h3>Step 3: Identify the Horizontal Middle Line</h3>
             <p>A transparent <strong>flipped upside-down copy</strong> appears on top. <strong>Drag it up or down</strong> on the canvas until its band sits directly on top of the original image to identify the middle line.</p>
           </div>
           <div class="wizard-controls">
@@ -1122,10 +1153,10 @@
           </div>
         </div>
 
-        <!-- Step C Controls -->
+        <!-- Step 4 Controls -->
         <div id="calStepPeriod" class="wizard-body" style="display:none;">
           <div class="wizard-instructions">
-            <h3>Step C: Determine the Repeat Length (<em>L</em>)</h3>
+            <h3>Step 4: Determine the Repeat Length (<em>L</em>)</h3>
             <p>An exact <strong>unflipped transparent copy</strong> appears on top. <strong>Drag it sideways</strong> (left or right) by one repeating unit until it matches the original pattern.</p>
           </div>
           <div class="wizard-controls">
@@ -1137,10 +1168,10 @@
           </div>
         </div>
 
-        <!-- Step D Banner -->
+        <!-- Step 5 Banner -->
         <div id="calStepAnalyze" class="wizard-body" style="display:none;">
           <div class="wizard-instructions">
-            <h3>Photo Calibrated &amp; Extended to Both Sides!</h3>
+            <h3>Photo Rectified, Calibrated &amp; Extended to Both Sides!</h3>
             <p>Midline locked at <strong>y = <span id="lockedMidlineVal">140</span>px</strong>, Period locked at <strong>L = <span id="lockedPeriodVal">160</span>px</strong>. Your pattern repeats seamlessly to both sides. Pick a tool, <strong>draw</strong> the symmetry you spotted (it will <strong>click into place</strong> when you are close), then <strong>test</strong> it.</p>
           </div>
           <div class="wizard-controls">
@@ -1605,10 +1636,6 @@
   /* ==========================================================================
      1. MATHEMATICAL DEFINITIONS OF THE 7 FRIEZE GROUPS & ADAPTIVE TILE LAYOUTS
      ========================================================================== */
-  // Adaptive tile layouts for Tab 1:
-  // rows: 1 (full height H, 100% scale) or 2 (half height H/2, shrunk 1/2 x 1/2 in both directions)
-  // cols: 1 (single column) or 2 (left + right columns)
-  // cells: array of { r, c, op } where op in {'I', 'H', 'V', 'R'}
   const FRIEZE_GROUPS = {
     p1: {
       code: 'p1',
@@ -1791,7 +1818,7 @@
   const state = {
     activeTab: 'quarter',
     savedPatterns: loadSavedPatternsFromStorage(),
-    activeSavedPattern: null, // { id, name, group, period, yMidRatio, tileImg, previewDataUrl }
+    activeSavedPattern: null,
     pendingSaveFactory: null,
     lastDeletedPattern: null,
 
@@ -1802,9 +1829,22 @@
       mysteryGroup: 'p2mg',
       motifStyle: 'scroll',
 
-      // Uploaded photo & 3-step guided calibration state
+      // Uploaded photo & 4-step guided calibration state
       rawPhotoImg: null,
-      calStep: 'analyze', // 'straighten' | 'midline' | 'period' | 'analyze'
+      // Normalized [0, 1] quadrilateral corners on rawPhotoImg: [TL, TR, BR, BL]
+      quadPts: [
+        { x: 0.12, y: 0.20 },
+        { x: 0.88, y: 0.20 },
+        { x: 0.88, y: 0.80 },
+        { x: 0.12, y: 0.80 }
+      ],
+      quadDirty: true,
+      quadDrawRect: null,
+      quadHoverPart: null,
+      quadDragStartPts: null,
+      quadActiveCorner: null,
+
+      calStep: 'analyze', // 'perspective' | 'straighten' | 'midline' | 'period' | 'analyze'
       straightenDeg: 0,
       twoPointMode: false,
       levelPoints: [],
@@ -1820,12 +1860,12 @@
 
       // Transformation & Magnetic Snapping
       baseAxisFrac: 0,
-      drawn: false,        // user has drawn a line / centre / vector
-      showOverlay: false,  // test animation visible
+      drawn: false,
+      showOverlay: false,
       drawnY: null,
       vecX0: 0,
       manualOffsetX: 0,
-      transform: 'T',     // 'T' | 'H' | 'V' | 'R' | 'G'
+      transform: 'T',
       progress: 0,
       isPlaying: false,
       animRaf: null,
@@ -1837,7 +1877,7 @@
       snapMessage: '',
 
       // Pointer drag state on analyzerCanvas
-      dragTarget: null,   // 'midline' | 'period' | 'overlay' | 'axisHandle'
+      dragTarget: null,
       dragStartX: 0,
       dragStartY: 0,
       dragInitialVal: 0,
@@ -1850,9 +1890,9 @@
     },
     quarter: {
       group: 'p2mm',
-      viewMode: 'single', // 'single' | 'all7'
+      viewMode: 'single',
       showRectGrid: true,
-      sourceType: 'draw', // 'draw' | 'photo'
+      sourceType: 'draw',
       photoImg: null,
       photoRot90: 0,
       photoFlipX: false,
@@ -1926,14 +1966,28 @@
   const creatorCanvas = document.getElementById('creatorCanvas');
   const creatorCtx = creatorCanvas.getContext('2d');
 
+  // Offscreen canvases for the photo calibration pipeline:
+  // rawPhotoPixelCanvas -> (Quad Homography) -> rectifiedPhotoCanvas -> (Optional Tilt) -> straightenedPhotoCanvas
+  const rawPhotoPixelCanvas = document.createElement('canvas');
+  const rawPhotoPixelCtx = rawPhotoPixelCanvas.getContext('2d');
+  const rectifiedPhotoCanvas = document.createElement('canvas');
+  const rectifiedPhotoCtx = rectifiedPhotoCanvas.getContext('2d');
   const straightenedPhotoCanvas = document.createElement('canvas');
   const straightenedPhotoCtx = straightenedPhotoCanvas.getContext('2d');
+
   const baseBuffer = document.createElement('canvas');
   const baseBufCtx = baseBuffer.getContext('2d');
   const overlayBuffer = document.createElement('canvas');
   const overlayBufCtx = overlayBuffer.getContext('2d');
 
-  const ANALYZER_H = 280; // fixed CSS height of the analyzer canvas (was re-read from a DOM attribute and doubled on hi-DPI screens)
+  const ANALYZER_H = 280;
+  const PERSPECTIVE_H = 360;
+
+  function getAnalyzerCssHeight() {
+    return (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep === 'perspective')
+      ? PERSPECTIVE_H
+      : ANALYZER_H;
+  }
 
   function setCanvasDpiSize(canvas, cssW, cssH) {
     const dpr = window.devicePixelRatio || 1;
@@ -1946,15 +2000,15 @@
   function resizeAllCanvases() {
     const aRect = analyzerCanvas.parentElement.getBoundingClientRect();
     const aW = Math.max(320, Math.floor(aRect.width));
-    const aH = ANALYZER_H;
-    const prevH = parseFloat(analyzerCanvas.style.height) || aH;
+    const aH = getAnalyzerCssHeight();
+    const prevH = parseFloat(analyzerCanvas.style.height) || ANALYZER_H;
     if (aRect.width > 0) {
       setCanvasDpiSize(analyzerCanvas, aW, aH);
       if (state.analyzer.sourceMode === 'saved' && state.activeSavedPattern) {
-        state.analyzer.yMid = (state.activeSavedPattern.yMidRatio || 0.5) * aH;
+        state.analyzer.yMid = (state.activeSavedPattern.yMidRatio || 0.5) * ANALYZER_H;
       } else if (state.analyzer.sourceMode !== 'photo') {
-        state.analyzer.yMid = aH / 2;
-      } else if (prevH > 0) {
+        state.analyzer.yMid = ANALYZER_H / 2;
+      } else if (state.analyzer.calStep !== 'perspective' && prevH === ANALYZER_H) {
         state.analyzer.yMid = (state.analyzer.yMid / prevH) * aH;
       }
     }
@@ -1974,7 +2028,10 @@
       setCanvasDpiSize(creatorCanvas, Math.max(300, Math.floor(cRect.width)), 250);
     }
 
-    if (state.analyzer.rawPhotoImg) {
+    if (state.analyzer.rawPhotoImg && state.analyzer.calStep !== 'perspective') {
+      if (state.analyzer.quadDirty || rectifiedPhotoCanvas.width === 0) {
+        rebuildRectifiedPhoto();
+      }
       rebuildStraightenedPhoto();
     }
     rebuildAnalyzerBuffers();
@@ -2179,11 +2236,8 @@
     const layout = FRIEZE_GROUPS[groupCode].tileLayout;
     const bandH = canvasH * 0.84;
     const yTop = (canvasH - bandH) / 2;
-    // Shrink height by 1/2 when 2 rows are required (e.g. horizontal mirror line),
-    // otherwise use full band height (1x1 scale)!
     const cellH = bandH / layout.rows;
     const aspect = getQuarterSourceAspectRatio();
-    // Shrink width by the exact same factor (preserving aspect ratio) so both directions scale together!
     const cellW = Math.round(cellH * aspect);
     const periodL = cellW * layout.cols;
     return { layout, bandH, yTop, cellW, cellH, periodL };
@@ -2240,8 +2294,8 @@
       lc.putImageData(im, 0, 0);
       return l;
     };
-    c.globalCompositeOperation = 'destination-out'; c.drawImage(layer(mask, [0, 0, 0]), 0, 0);   // clear what was there
-    c.globalCompositeOperation = 'destination-over'; c.drawImage(layer(grow, rgb), 0, 0);          // paint fill beneath the outlines
+    c.globalCompositeOperation = 'destination-out'; c.drawImage(layer(mask, [0, 0, 0]), 0, 0);
+    c.globalCompositeOperation = 'destination-over'; c.drawImage(layer(grow, rgb), 0, 0);
     c.globalCompositeOperation = 'source-over';
   }
 
@@ -2300,7 +2354,6 @@
       const targetW = isSwapped ? h : w;
       const targetH = isSwapped ? w : h;
 
-      // Fit entire uploaded image cleanly inside the cell (contain * zoom) so letters/motifs aren't cropped
       const scale = Math.min(targetW / img.width, targetH / img.height) * state.quarter.photoZoom;
       const drawW = img.width * scale;
       const drawH = img.height * scale;
@@ -2347,7 +2400,6 @@
           ctx.strokeRect(rx, yTop, periodL, bandH);
         }
 
-        // Draw internal sub-cell divisions if rows === 2 or cols === 2
         ctx.strokeStyle = 'rgba(37, 99, 235, 0.35)';
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
@@ -2515,7 +2567,6 @@
 
   function launchQuarterPatternInAnalyzer(groupCode) {
     state.quarter.group = groupCode;
-    const dpr = window.devicePixelRatio || 1;
     const aH = ANALYZER_H;
     const { periodL } = getAdaptiveTileMetrics(aH, groupCode);
 
@@ -2538,14 +2589,189 @@
   }
 
   /* ==========================================================================
-     8. ACTIVITY 2: PHOTO STRAIGHTENING, BILATERAL EXTENSION & ANALYZER BUFFERS
+     8. ACTIVITY 2: PERSPECTIVE QUADRILATERAL UNWARP, STRAIGHTENING & BUFFERS
      ========================================================================== */
+  function cacheRawPhotoPixels(img) {
+    const maxDim = 1600;
+    const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+    rawPhotoPixelCanvas.width = w;
+    rawPhotoPixelCanvas.height = h;
+    rawPhotoPixelCtx.clearRect(0, 0, w, h);
+    rawPhotoPixelCtx.drawImage(img, 0, 0, w, h);
+  }
+
+  function computeHomographyFromUnitSquare(q) {
+    // Maps unit square (u, v) in [0,1]^2 -> source pixel coordinates q = [TL, TR, BR, BL]
+    const x0 = q[0].x, y0 = q[0].y;
+    const x1 = q[1].x, y1 = q[1].y;
+    const x2 = q[2].x, y2 = q[2].y;
+    const x3 = q[3].x, y3 = q[3].y;
+
+    const dx1 = x1 - x2, dx2 = x3 - x2, sx = x0 - x1 + x2 - x3;
+    const dy1 = y1 - y2, dy2 = y3 - y2, sy = y0 - y1 + y2 - y3;
+
+    if (Math.abs(sx) < 1e-6 && Math.abs(sy) < 1e-6) {
+      return [
+        x1 - x0, x2 - x1, x0,
+        y1 - y0, y2 - y1, y0,
+        0,       0,       1
+      ];
+    }
+
+    const denom = dx1 * dy2 - dx2 * dy1;
+    if (Math.abs(denom) < 1e-8) {
+      return [
+        x1 - x0, x3 - x0, x0,
+        y1 - y0, y3 - y0, y0,
+        0,       0,       1
+      ];
+    }
+
+    const h20 = (sx * dy2 - sy * dx2) / denom;
+    const h21 = (dx1 * sy - dy1 * sx) / denom;
+    const h00 = x1 - x0 + h20 * x1;
+    const h01 = x3 - x0 + h21 * x3;
+    const h02 = x0;
+    const h10 = y1 - y0 + h20 * y1;
+    const h11 = y3 - y0 + h21 * y3;
+    const h12 = y0;
+
+    return [h00, h01, h02, h10, h11, h12, h20, h21, 1];
+  }
+
+  function isConvexQuad(pts) {
+    let sign = 0;
+    for (let i = 0; i < 4; i++) {
+      const p0 = pts[i];
+      const p1 = pts[(i + 1) % 4];
+      const p2 = pts[(i + 2) % 4];
+      const cross = (p1.x - p0.x) * (p2.y - p1.y) - (p1.y - p0.y) * (p2.x - p1.x);
+      if (Math.abs(cross) < 1e-6) return false;
+      const s = cross > 0 ? 1 : -1;
+      if (sign === 0) sign = s;
+      else if (sign !== s) return false;
+    }
+    return true;
+  }
+
+  function pointInQuad(pt, q) {
+    let pos = 0, neg = 0;
+    for (let i = 0; i < 4; i++) {
+      const a = q[i];
+      const b = q[(i + 1) % 4];
+      const cross = (b.x - a.x) * (pt.y - a.y) - (b.y - a.y) * (pt.x - a.x);
+      if (cross > 0) pos++;
+      else if (cross < 0) neg++;
+    }
+    return pos === 0 || neg === 0;
+  }
+
+  function distToSegment(p, a, b) {
+    const vx = b.x - a.x, vy = b.y - a.y;
+    const wx = p.x - a.x, wy = p.y - a.y;
+    const len2 = vx * vx + vy * vy;
+    const t = len2 > 0 ? Math.max(0, Math.min(1, (wx * vx + wy * vy) / len2)) : 0;
+    const projX = a.x + t * vx, projY = a.y + t * vy;
+    return Math.hypot(p.x - projX, p.y - projY);
+  }
+
+  function rebuildRectifiedPhoto() {
+    if (!state.analyzer.rawPhotoImg || rawPhotoPixelCanvas.width === 0) return;
+
+    const srcW = rawPhotoPixelCanvas.width;
+    const srcH = rawPhotoPixelCanvas.height;
+    const srcImgData = rawPhotoPixelCtx.getImageData(0, 0, srcW, srcH);
+    const src = srcImgData.data;
+
+    const q = state.analyzer.quadPts.map((p) => ({
+      x: p.x * (srcW - 1),
+      y: p.y * (srcH - 1)
+    }));
+
+    const wTop = Math.hypot(q[1].x - q[0].x, q[1].y - q[0].y);
+    const wBot = Math.hypot(q[2].x - q[3].x, q[2].y - q[3].y);
+    const hLeft = Math.hypot(q[3].x - q[0].x, q[3].y - q[0].y);
+    const hRight = Math.hypot(q[2].x - q[1].x, q[2].y - q[1].y);
+
+    let dstW = Math.max(24, Math.round(Math.max(wTop, wBot)));
+    let dstH = Math.max(24, Math.round(Math.max(hLeft, hRight)));
+
+    const maxDstW = 1200;
+    const maxDstH = 480;
+    const downScale = Math.min(1, maxDstW / dstW, maxDstH / dstH);
+    dstW = Math.max(24, Math.round(dstW * downScale));
+    dstH = Math.max(24, Math.round(dstH * downScale));
+
+    rectifiedPhotoCanvas.width = dstW;
+    rectifiedPhotoCanvas.height = dstH;
+
+    const dstImgData = rectifiedPhotoCtx.createImageData(dstW, dstH);
+    const dst = dstImgData.data;
+    const H = computeHomographyFromUnitSquare(q);
+
+    const invW = dstW > 1 ? 1 / (dstW - 1) : 0;
+    const invH = dstH > 1 ? 1 / (dstH - 1) : 0;
+    const maxSrcX = srcW - 1.001;
+    const maxSrcY = srcH - 1.001;
+
+    for (let py = 0; py < dstH; py++) {
+      const v = py * invH;
+      const rx0 = H[1] * v + H[2];
+      const ry0 = H[4] * v + H[5];
+      const rw0 = H[7] * v + H[8];
+      const rowOffset = py * dstW * 4;
+
+      for (let px = 0; px < dstW; px++) {
+        const u = px * invW;
+        const w = H[6] * u + rw0;
+        let sx = (H[0] * u + rx0) / w;
+        let sy = (H[3] * u + ry0) / w;
+
+        if (sx < 0) sx = 0;
+        else if (sx > maxSrcX) sx = maxSrcX;
+        if (sy < 0) sy = 0;
+        else if (sy > maxSrcY) sy = maxSrcY;
+
+        const x0 = sx | 0;
+        const y0 = sy | 0;
+        const fx = sx - x0;
+        const fy = sy - y0;
+        const ifx = 1 - fx;
+        const ify = 1 - fy;
+
+        const w00 = ifx * ify;
+        const w10 = fx * ify;
+        const w01 = ifx * fy;
+        const w11 = fx * fy;
+
+        const i00 = (y0 * srcW + x0) * 4;
+        const i10 = i00 + 4;
+        const i01 = i00 + srcW * 4;
+        const i11 = i01 + 4;
+
+        const outIdx = rowOffset + px * 4;
+        dst[outIdx]     = src[i00]     * w00 + src[i10]     * w10 + src[i01]     * w01 + src[i11]     * w11;
+        dst[outIdx + 1] = src[i00 + 1] * w00 + src[i10 + 1] * w10 + src[i01 + 1] * w01 + src[i11 + 1] * w11;
+        dst[outIdx + 2] = src[i00 + 2] * w00 + src[i10 + 2] * w10 + src[i01 + 2] * w01 + src[i11 + 2] * w11;
+        dst[outIdx + 3] = src[i00 + 3] * w00 + src[i10 + 3] * w10 + src[i01 + 3] * w01 + src[i11 + 3] * w11;
+      }
+    }
+
+    rectifiedPhotoCtx.putImageData(dstImgData, 0, 0);
+    state.analyzer.quadDirty = false;
+  }
+
   function rebuildStraightenedPhoto() {
-    const img = state.analyzer.rawPhotoImg;
-    if (!img) return;
+    if (!state.analyzer.rawPhotoImg) return;
+    if (state.analyzer.quadDirty || rectifiedPhotoCanvas.width === 0) {
+      rebuildRectifiedPhoto();
+    }
+    const srcCvs = rectifiedPhotoCanvas;
     const dpr = window.devicePixelRatio || 1;
     const cssW = analyzerCanvas.width / dpr;
-    const cssH = analyzerCanvas.height / dpr;
+    const cssH = ANALYZER_H;
 
     straightenedPhotoCanvas.width = cssW * dpr;
     straightenedPhotoCanvas.height = cssH * dpr;
@@ -2553,18 +2779,17 @@
     straightenedPhotoCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     straightenedPhotoCtx.clearRect(0, 0, cssW, cssH);
 
-    const maxW = cssW * 0.90;
-    const maxH = cssH * 0.72;
-    const scale = Math.min(maxW / img.width, maxH / img.height);
-    const drawW = img.width * scale;
-    const drawH = img.height * scale;
+    const maxW = cssW * 0.92;
+    const maxH = cssH * 0.74;
+    const scale = Math.min(maxW / srcCvs.width, maxH / srcCvs.height);
+    const drawW = srcCvs.width * scale;
+    const drawH = srcCvs.height * scale;
 
     straightenedPhotoCtx.translate(cssW / 2, cssH / 2);
     straightenedPhotoCtx.rotate((state.analyzer.straightenDeg * Math.PI) / 180);
-    straightenedPhotoCtx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+    straightenedPhotoCtx.drawImage(srcCvs, -drawW / 2, -drawH / 2, drawW, drawH);
     straightenedPhotoCtx.restore();
 
-    // Determine the horizontal span of the drawn photo so we can extract the central L-wide unit
     const rad = Math.abs((state.analyzer.straightenDeg * Math.PI) / 180);
     const projectedW = drawW * Math.cos(rad) + drawH * Math.sin(rad);
     const photoLeft = Math.max(0, cssW / 2 - projectedW / 2);
@@ -2593,13 +2818,12 @@
       return;
     }
 
-    // Recompute tile bounds for current L
-    const img = state.analyzer.rawPhotoImg;
-    const maxW = cssW * 0.90;
-    const maxH = cssH * 0.72;
-    const scale = Math.min(maxW / img.width, maxH / img.height);
-    const drawW = img.width * scale;
-    const drawH = img.height * scale;
+    const srcCvs = rectifiedPhotoCanvas;
+    const maxW = cssW * 0.92;
+    const maxH = cssH * 0.74;
+    const scale = Math.min(maxW / srcCvs.width, maxH / srcCvs.height);
+    const drawW = srcCvs.width * scale;
+    const drawH = srcCvs.height * scale;
     const rad = Math.abs((state.analyzer.straightenDeg * Math.PI) / 180);
     const projectedW = drawW * Math.cos(rad) + drawH * Math.sin(rad);
     const photoLeft = Math.max(0, cssW / 2 - projectedW / 2);
@@ -2626,7 +2850,6 @@
   }
 
   function buildPhotoCorrelationSample(cssW, cssH) {
-    // Build a fast downsampled grayscale strip of baseBuffer for real-time photo symmetry snapping
     const sampleW = Math.min(900, Math.round(cssW * 1.5));
     const sampleH = 56;
     const bandHalf = Math.max(24, Math.min(cssH * 0.42, 95));
@@ -2693,6 +2916,7 @@
     const overlayColor = state.analyzer.tintOverlay ? '#e11d48' : '#1e293b';
 
     if (state.analyzer.sourceMode === 'photo' && state.analyzer.rawPhotoImg) {
+      if (state.analyzer.calStep === 'perspective') return;
       drawExtendedPhotoStrip(baseBufCtx, -pad, cssW + pad, cssW, cssH);
       drawExtendedPhotoStrip(overlayBufCtx, -pad, cssW + pad, cssW, cssH);
       if (state.analyzer.tintOverlay) {
@@ -2827,7 +3051,6 @@
     const baseX0 = state.analyzer.baseAxisFrac * L;
     const groupCode = getActiveKnownGroupCode();
 
-    // Case A: Exact mathematical symmetry snapping for known Frieze groups
     if (groupCode && FRIEZE_GROUPS[groupCode]) {
       const g = FRIEZE_GROUPS[groupCode];
       const sym = g.symmetries;
@@ -2859,7 +3082,6 @@
         const curX0 = baseX0 + state.analyzer.manualOffsetX / 2;
         let nearestX0;
         if (groupCode === 'p2mg') {
-          // 180° rotation centers in p2mg are at (k + 0.25)L and (k + 0.75)L
           nearestX0 = (Math.round((curX0 - L * 0.25) / (L / 2)) * (L / 2)) + L * 0.25;
         } else {
           nearestX0 = Math.round(curX0 / (L / 2)) * (L / 2);
@@ -2870,7 +3092,6 @@
           state.analyzer.snapMessage = `\ud83e\uddf2 Snapped to 180\u00b0 Rotation Centre (x\u2080 = ${Math.round(nearestX0)}px)`;
         }
       } else if (tType === 'G' && (sym.G || sym.H)) {
-        // true glide (no H mirror): v = L/2 + kL. With an H mirror, v = kL (k != 0) also works, as mirror + translation.
         const off = sym.G ? L / 2 : 0;
         const curTotalShift = L / 2 + state.analyzer.manualOffsetX;
         const k = Math.round((curTotalShift - off) / L);
@@ -2882,7 +3103,6 @@
         }
       }
     } else if (state.analyzer.photoGrayGrid) {
-      // Case B: Image-correlation magnetic snapping for uploaded photos!
       const centerManualX = state.analyzer.manualOffsetX;
       let bestOffset = centerManualX;
       let bestErr = Infinity;
@@ -2904,7 +3124,6 @@
 
       if (samples > 5) {
         const avgErr = sumErr / samples;
-        // Snap when there is a clear alignment minimum (significantly sharper match than surrounding offsets)
         if (bestErr < 34 && bestErr < avgErr * 0.72) {
           state.analyzer.manualOffsetX = bestOffset;
           state.analyzer.isSnapped = true;
@@ -2940,8 +3159,210 @@
   }
 
   /* ==========================================================================
-     10. MAIN ANALYZER RENDERER (CALIBRATION + MAGNETIC DRAG + MARKED ELEMENTS)
+     10. MAIN ANALYZER RENDERER (PERSPECTIVE QUAD + CALIBRATION + ANALYSIS)
      ========================================================================== */
+  function getQuadScreenCorners(cssW, cssH) {
+    const img = state.analyzer.rawPhotoImg;
+    if (!img) return null;
+    const padX = 24;
+    const padY = 18;
+    const availW = Math.max(80, cssW - padX * 2);
+    const availH = Math.max(80, cssH - padY * 2);
+    const scale = Math.min(availW / img.width, availH / img.height);
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+    const drawX = (cssW - drawW) / 2;
+    const drawY = (cssH - drawH) / 2;
+
+    state.analyzer.quadDrawRect = { x: drawX, y: drawY, w: drawW, h: drawH };
+    return state.analyzer.quadPts.map((p) => ({
+      x: drawX + p.x * drawW,
+      y: drawY + p.y * drawH
+    }));
+  }
+
+  function drawPerspectiveQuadEditor(ctx, cssW, cssH) {
+    const img = state.analyzer.rawPhotoImg;
+    if (!img) return;
+
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    const pts = getQuadScreenCorners(cssW, cssH);
+    const rect = state.analyzer.quadDrawRect;
+    ctx.drawImage(img, rect.x, rect.y, rect.w, rect.h);
+
+    const valid = isConvexQuad(state.analyzer.quadPts);
+    const warnBadge = document.getElementById('quadInvalidBadge');
+    const nextBtn = document.getElementById('toStraightenStepBtn');
+    if (warnBadge) warnBadge.style.display = valid ? 'none' : 'inline-flex';
+    if (nextBtn) nextBtn.disabled = !valid;
+
+    // Darken exterior outside selected quadrilateral
+    ctx.save();
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.52)';
+    ctx.beginPath();
+    ctx.rect(rect.x, rect.y, rect.w, rect.h);
+    ctx.moveTo(pts[0].x, pts[0].y);
+    ctx.lineTo(pts[3].x, pts[3].y);
+    ctx.lineTo(pts[2].x, pts[2].y);
+    ctx.lineTo(pts[1].x, pts[1].y);
+    ctx.closePath();
+    ctx.fill('evenodd');
+    ctx.restore();
+
+    // Projective grid lines inside the quadrilateral
+    if (valid) {
+      const H = computeHomographyFromUnitSquare(pts);
+      const evalH = (u, v) => {
+        const w = H[6] * u + H[7] * v + H[8];
+        return {
+          x: (H[0] * u + H[1] * v + H[2]) / w,
+          y: (H[3] * u + H[4] * v + H[5]) / w
+        };
+      };
+
+      ctx.save();
+      [0.25, 0.5, 0.75].forEach((v) => {
+        const a = evalH(0, v);
+        const b = evalH(1, v);
+        ctx.strokeStyle = v === 0.5 ? 'rgba(56, 189, 248, 0.85)' : 'rgba(255, 255, 255, 0.42)';
+        ctx.lineWidth = v === 0.5 ? 1.8 : 1;
+        ctx.setLineDash(v === 0.5 ? [6, 4] : [3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      });
+
+      for (let i = 1; i < 8; i++) {
+        const u = i / 8;
+        const a = evalH(u, 0);
+        const b = evalH(u, 1);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.32)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Quadrilateral boundary edges
+    const strokeCol = valid ? '#38bdf8' : '#f43f5e';
+    ctx.save();
+    ctx.strokeStyle = strokeCol;
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < 4; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Edge midpoint grips
+    for (let i = 0; i < 4; i++) {
+      const a = pts[i];
+      const b = pts[(i + 1) % 4];
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2;
+      const isEdgeHover = state.analyzer.quadHoverPart === `edge:${i}` || state.analyzer.dragTarget === `edge:${i}`;
+      ctx.fillStyle = isEdgeHover ? '#0284c7' : '#ffffff';
+      ctx.strokeStyle = strokeCol;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(mx, my, isEdgeHover ? 6.5 : 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // 4 Corner handles (TL, TR, BR, BL)
+    const labels = ['TL', 'TR', 'BR', 'BL'];
+    pts.forEach((p, idx) => {
+      const isActive = state.analyzer.quadActiveCorner === idx || state.analyzer.quadHoverPart === `corner:${idx}`;
+      ctx.fillStyle = isActive ? '#059669' : '#2563eb';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, isActive ? 12 : 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(labels[idx], p.x, p.y + 0.5);
+    });
+    ctx.restore();
+
+    // Scanner-style Zoomed Magnifier Loupe when dragging a corner handle
+    const activeIdx = state.analyzer.quadActiveCorner;
+    if (activeIdx !== null && activeIdx >= 0 && activeIdx < 4) {
+      const normPt = state.analyzer.quadPts[activeIdx];
+      const screenPt = pts[activeIdx];
+      const loupeR = 54;
+      const loupeX = screenPt.x < cssW * 0.5 ? cssW - loupeR - 16 : loupeR + 16;
+      const loupeY = loupeR + 16;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(loupeX, loupeY, loupeR, 0, Math.PI * 2);
+      ctx.clip();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(loupeX - loupeR, loupeY - loupeR, loupeR * 2, loupeR * 2);
+
+      const zoom = 2.6;
+      const srcFocusX = normPt.x * img.width;
+      const srcFocusY = normPt.y * img.height;
+      const imgToScreenScale = rect.w / img.width;
+      const effScale = imgToScreenScale * zoom;
+
+      ctx.drawImage(
+        img,
+        loupeX - srcFocusX * effScale,
+        loupeY - srcFocusY * effScale,
+        img.width * effScale,
+        img.height * effScale
+      );
+
+      const prevPt = pts[(activeIdx + 3) % 4];
+      const nextPt = pts[(activeIdx + 1) % 4];
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(loupeX + (prevPt.x - screenPt.x) * zoom, loupeY + (prevPt.y - screenPt.y) * zoom);
+      ctx.lineTo(loupeX, loupeY);
+      ctx.lineTo(loupeX + (nextPt.x - screenPt.x) * zoom, loupeY + (nextPt.y - screenPt.y) * zoom);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(loupeX - 14, loupeY);
+      ctx.lineTo(loupeX + 14, loupeY);
+      ctx.moveTo(loupeX, loupeY - 14);
+      ctx.lineTo(loupeX, loupeY + 14);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(loupeX, loupeY, loupeR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(loupeX, loupeY, loupeR + 1.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
   function renderAnalyzer() {
     const dpr = window.devicePixelRatio || 1;
     const cssW = analyzerCanvas.width / dpr;
@@ -2957,11 +3378,17 @@
     analyzerCtx.fillRect(0, 0, cssW, cssH);
 
     // ------------------------------------------------------------------------
-    // CASE 1: PHOTO GUIDED CALIBRATION STEPS (Straighten -> Midline -> Period)
+    // CASE 1: PHOTO GUIDED CALIBRATION STEPS (Perspective -> Straighten -> Midline -> Period)
     // ------------------------------------------------------------------------
     if (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep !== 'analyze') {
       const step = state.analyzer.calStep;
       updateSnapBadgeUI();
+
+      if (step === 'perspective') {
+        drawPerspectiveQuadEditor(analyzerCtx, cssW, cssH);
+        analyzerCtx.restore();
+        return;
+      }
 
       analyzerCtx.drawImage(
         straightenedPhotoCanvas,
@@ -3084,7 +3511,6 @@
     applyMagneticSnap(cssW);
     const isSnapped = state.analyzer.isSnapped;
 
-    // Highlight one fundamental repeat tile L
     const tileHighlightX = state.analyzer.sourceMode === 'photo' ? state.analyzer.photoTileLeft : 0;
     analyzerCtx.fillStyle = 'rgba(37, 99, 235, 0.035)';
     analyzerCtx.fillRect(tileHighlightX, 0, L, cssH);
@@ -3098,7 +3524,6 @@
     analyzerCtx.stroke();
     analyzerCtx.setLineDash([]);
 
-    // Base Pattern (extended to both sides)
     analyzerCtx.drawImage(
       baseBuffer,
       0, 0, baseBuffer.width, baseBuffer.height,
@@ -3108,7 +3533,6 @@
     const geom = computeActiveTransformGeometry(cssW);
     updateLiveReadout(geom, L);
 
-    // Test animation: a transparent copy undergoing exactly the transformation the user drew
     if (state.analyzer.showOverlay) {
       analyzerCtx.save();
       analyzerCtx.globalAlpha = state.analyzer.overlayOpacity;
@@ -3117,12 +3541,10 @@
       analyzerCtx.restore();
     }
 
-    // Draw User's Marked Symmetries
     if (state.analyzer.showMarked && state.analyzer.markedSymmetries.length > 0) {
       drawMarkedSymmetries(analyzerCtx, cssW, cssH);
     }
 
-    // Draw Active Live Axis / Center Handle on Top (with emerald glow when magnetically snapped!)
     const activeAxisColor = isSnapped ? '#059669' : '#2563eb';
 
     if (state.analyzer.drawn && (geom.type === 'H' || geom.type === 'G')) {
@@ -3271,7 +3693,6 @@
     else if (g.type === 'G') { ctx.translate(g.totalShiftX, y); ctx.scale(1, g.scaleY); ctx.translate(0, -y); }
   }
 
-  // Compare the pattern with a copy that has undergone the drawn transformation (low-res ink difference)
   function evaluateMatch(geom) {
     const dpr = window.devicePixelRatio || 1;
     const cssW = analyzerCanvas.width / dpr, cssH = analyzerCanvas.height / dpr;
@@ -3297,7 +3718,6 @@
     return { works: score >= (isPhoto ? 0.55 : 0.85), pct: Math.round(score * 100) };
   }
 
-  // A glide (reflect in the midline + slide by v) is "true" only if neither the reflection nor the slide is a symmetry alone
   function glideKind(geom) {
     const refl = evaluateMatch({ type: 'H', scaleY: -1, y: geom.y }).works;
     const slide = evaluateMatch({ type: 'T', totalShiftX: geom.totalShiftX }).works;
@@ -3329,7 +3749,6 @@
       const x0 = baseX0 + manualX / 2;
       return { type: 'R', x0, angleRad: Math.PI * ep, y: axisY() };
     }
-    // Glide Reflection ('G')
     let shiftX = 0;
     let scaleY = 1;
     if (p <= 0.5) {
@@ -3469,14 +3888,14 @@
     if (geom.type === 'V') { a.markedSymmetries.push({ type: 'V', x: geom.x0 }); autoCheckSymmetry('V'); }
     else if (geom.type === 'H') { a.markedSymmetries.push({ type: 'H', y: geom.y }); autoCheckSymmetry('H'); }
     else if (geom.type === 'R') { a.markedSymmetries.push({ type: 'R', x: geom.x0, y: geom.y }); autoCheckSymmetry('R'); }
-    else if (geom.type === 'G') { {
+    else if (geom.type === 'G') {
       const k = glideKind(geom);
       a.markedSymmetries.push({ type: 'G', y: geom.y, xStart: a.vecX0, dx: geom.totalShiftX, trueGlide: k.trueGlide });
       if (k.trueGlide) autoCheckSymmetry('G');
       else showToast('That works, but it is not a true glide: the midline is a mirror and the slide is a translation. Use the Horizontal Mirror tool to pin the mirror itself.');
-    } }
+    }
     else { a.markedSymmetries.push({ type: 'G', y: axisY(), xStart: a.vecX0, dx: geom.totalShiftX }); }
-    updateMarkedCountUI(); // also clears the drawn element, ready for the next one
+    updateMarkedCountUI();
     renderAnalyzer();
   }
 
@@ -3493,7 +3912,6 @@
 
   function updateMarkedCountUI() {
     document.getElementById('markedCountBadge').textContent = state.analyzer.markedSymmetries.length;
-    // Every pattern change / pin / undo / clear starts a fresh drawing
     pauseAnimation();
     clearDrawn();
     syncScrubberUI();
@@ -3551,8 +3969,36 @@
   });
 
   /* ==========================================================================
-     12. ANALYZER POINTER DRAGGING (CALIBRATION + MAGNETIC OVERLAY DRAG)
+     12. ANALYZER POINTER DRAGGING (PERSPECTIVE QUAD + CALIBRATION + ANALYSIS)
      ========================================================================== */
+  function hitTestQuadControl(px, py, cssW, cssH) {
+    const pts = getQuadScreenCorners(cssW, cssH);
+    if (!pts) return null;
+
+    // 1. Check 4 corners first (generous 18px radius)
+    for (let i = 0; i < 4; i++) {
+      if (Math.hypot(px - pts[i].x, py - pts[i].y) <= 18) {
+        return `corner:${i}`;
+      }
+    }
+
+    // 2. Check 4 edges (within 11px of edge segment)
+    for (let i = 0; i < 4; i++) {
+      const a = pts[i];
+      const b = pts[(i + 1) % 4];
+      if (distToSegment({ x: px, y: py }, a, b) <= 11) {
+        return `edge:${i}`;
+      }
+    }
+
+    // 3. Check interior of quadrilateral
+    if (pointInQuad({ x: px, y: py }, pts)) {
+      return 'quadMove';
+    }
+
+    return null;
+  }
+
   function drawSymmetryElement(px, py, start) {
     const a = state.analyzer, L = a.period, t = a.transform;
     a.drawn = true; a.showOverlay = false; a.progress = 1; a.baseAxisFrac = 0;
@@ -3574,10 +4020,25 @@
     const py = e.clientY - rect.top;
     const dpr = window.devicePixelRatio || 1;
     const cssW = analyzerCanvas.width / dpr;
+    const cssH = analyzerCanvas.height / dpr;
 
     pauseAnimation();
 
     if (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep !== 'analyze') {
+      if (state.analyzer.calStep === 'perspective') {
+        const hit = hitTestQuadControl(px, py, cssW, cssH);
+        if (hit) {
+          state.analyzer.dragTarget = hit;
+          state.analyzer.dragStartX = px;
+          state.analyzer.dragStartY = py;
+          state.analyzer.quadDragStartPts = state.analyzer.quadPts.map((p) => ({ x: p.x, y: p.y }));
+          state.analyzer.quadActiveCorner = hit.startsWith('corner:') ? parseInt(hit.split(':')[1], 10) : null;
+          analyzerCanvas.setPointerCapture(e.pointerId);
+          renderAnalyzer();
+        }
+        return;
+      }
+
       if (state.analyzer.calStep === 'straighten' && state.analyzer.twoPointMode) {
         state.analyzer.levelPoints.push({ x: px, y: py });
         if (state.analyzer.levelPoints.length === 2) {
@@ -3617,12 +4078,65 @@
   });
 
   analyzerCanvas.addEventListener('pointermove', (e) => {
-    if (!state.analyzer.dragTarget) return;
     const rect = analyzerCanvas.getBoundingClientRect();
     const px = e.clientX - rect.left;
     const py = e.clientY - rect.top;
     const dpr = window.devicePixelRatio || 1;
+    const cssW = analyzerCanvas.width / dpr;
     const cssH = analyzerCanvas.height / dpr;
+
+    if (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep === 'perspective' && !state.analyzer.dragTarget) {
+      const hover = hitTestQuadControl(px, py, cssW, cssH);
+      if (hover !== state.analyzer.quadHoverPart) {
+        state.analyzer.quadHoverPart = hover;
+        analyzerCanvas.style.cursor = hover
+          ? (hover.startsWith('corner:') ? 'crosshair' : 'move')
+          : 'default';
+        renderAnalyzer();
+      }
+      return;
+    }
+
+    if (!state.analyzer.dragTarget) return;
+
+    if (state.analyzer.dragTarget.startsWith('corner:') || state.analyzer.dragTarget.startsWith('edge:') || state.analyzer.dragTarget === 'quadMove') {
+      const drawRect = state.analyzer.quadDrawRect;
+      if (!drawRect || !state.analyzer.quadDragStartPts) return;
+      const du = (px - state.analyzer.dragStartX) / drawRect.w;
+      const dv = (py - state.analyzer.dragStartY) / drawRect.h;
+      const startPts = state.analyzer.quadDragStartPts;
+
+      if (state.analyzer.dragTarget.startsWith('corner:')) {
+        const idx = parseInt(state.analyzer.dragTarget.split(':')[1], 10);
+        state.analyzer.quadPts[idx] = {
+          x: Math.max(0, Math.min(1, startPts[idx].x + du)),
+          y: Math.max(0, Math.min(1, startPts[idx].y + dv))
+        };
+      } else if (state.analyzer.dragTarget.startsWith('edge:')) {
+        const edgeIdx = parseInt(state.analyzer.dragTarget.split(':')[1], 10);
+        const i1 = edgeIdx;
+        const i2 = (edgeIdx + 1) % 4;
+        const clampedDu = Math.max(-Math.min(startPts[i1].x, startPts[i2].x), Math.min(1 - Math.max(startPts[i1].x, startPts[i2].x), du));
+        const clampedDv = Math.max(-Math.min(startPts[i1].y, startPts[i2].y), Math.min(1 - Math.max(startPts[i1].y, startPts[i2].y), dv));
+        state.analyzer.quadPts[i1] = { x: startPts[i1].x + clampedDu, y: startPts[i1].y + clampedDv };
+        state.analyzer.quadPts[i2] = { x: startPts[i2].x + clampedDu, y: startPts[i2].y + clampedDv };
+      } else if (state.analyzer.dragTarget === 'quadMove') {
+        const minX = Math.min(...startPts.map((p) => p.x));
+        const maxX = Math.max(...startPts.map((p) => p.x));
+        const minY = Math.min(...startPts.map((p) => p.y));
+        const maxY = Math.max(...startPts.map((p) => p.y));
+        const clampedDu = Math.max(-minX, Math.min(1 - maxX, du));
+        const clampedDv = Math.max(-minY, Math.min(1 - maxY, dv));
+        state.analyzer.quadPts = startPts.map((p) => ({
+          x: p.x + clampedDu,
+          y: p.y + clampedDv
+        }));
+      }
+
+      state.analyzer.quadDirty = true;
+      renderAnalyzer();
+      return;
+    }
 
     if (state.analyzer.dragTarget === 'midline') {
       const dy = py - state.analyzer.dragStartY;
@@ -3640,24 +4154,37 @@
 
   function releaseAnalyzerPointer(e) {
     if (state.analyzer.dragTarget) {
+      const wasQuadDrag = state.analyzer.dragTarget.startsWith('corner:') ||
+        state.analyzer.dragTarget.startsWith('edge:') ||
+        state.analyzer.dragTarget === 'quadMove';
       state.analyzer.dragTarget = null;
+      state.analyzer.quadActiveCorner = null;
       try { analyzerCanvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      if (wasQuadDrag) renderAnalyzer();
     }
   }
   analyzerCanvas.addEventListener('pointerup', releaseAnalyzerPointer);
   analyzerCanvas.addEventListener('pointercancel', releaseAnalyzerPointer);
 
   /* ==========================================================================
-     13. PHOTO UPLOAD & 3-STEP GUIDED CALIBRATION WIZARD CONTROLS
+     13. PHOTO UPLOAD & 4-STEP GUIDED CALIBRATION WIZARD CONTROLS
      ========================================================================== */
   function setCalibrationStep(stepName) {
+    const prevStep = state.analyzer.calStep;
     state.analyzer.calStep = stepName;
     state.analyzer.twoPointMode = false;
     state.analyzer.levelPoints = [];
-    document.getElementById('twoPointLevelBtn').classList.remove('active-pill');
-    document.getElementById('analyzerStage').classList.remove('crosshair');
+    state.analyzer.quadActiveCorner = null;
+    state.analyzer.quadHoverPart = null;
+    analyzerCanvas.style.cursor = '';
 
-    const order = ['straighten', 'midline', 'period', 'analyze'];
+    document.getElementById('twoPointLevelBtn').classList.remove('active-pill');
+    const stageEl = document.getElementById('analyzerStage');
+    stageEl.classList.remove('crosshair');
+    stageEl.classList.toggle('quad-mode', stepName === 'perspective');
+    stageEl.classList.toggle('draggable', stepName !== 'perspective');
+
+    const order = ['perspective', 'straighten', 'midline', 'period', 'analyze'];
     const idx = order.indexOf(stepName);
 
     document.querySelectorAll('.w-step').forEach((btn) => {
@@ -3666,6 +4193,7 @@
       btn.classList.toggle('done', bIdx < idx);
     });
 
+    document.getElementById('calStepPerspective').style.display = stepName === 'perspective' ? 'flex' : 'none';
     document.getElementById('calStepStraighten').style.display = stepName === 'straighten' ? 'flex' : 'none';
     document.getElementById('calStepMidline').style.display = stepName === 'midline' ? 'flex' : 'none';
     document.getElementById('calStepPeriod').style.display = stepName === 'period' ? 'flex' : 'none';
@@ -3677,6 +4205,19 @@
     document.getElementById('markSymmetryToolbar').style.display = inAnalysis ? 'flex' : 'none';
     document.getElementById('analyzerAxisHint').style.display = inAnalysis ? 'flex' : 'none';
 
+    if ((prevStep === 'perspective') !== (stepName === 'perspective')) {
+      const aRect = analyzerCanvas.parentElement.getBoundingClientRect();
+      const aW = Math.max(320, Math.floor(aRect.width || 640));
+      setCanvasDpiSize(analyzerCanvas, aW, getAnalyzerCssHeight());
+    }
+
+    if (stepName !== 'perspective' && state.analyzer.rawPhotoImg) {
+      if (state.analyzer.quadDirty || rectifiedPhotoCanvas.width === 0) {
+        rebuildRectifiedPhoto();
+      }
+      rebuildStraightenedPhoto();
+    }
+
     if (inAnalysis) {
       document.getElementById('lockedMidlineVal').textContent = Math.round(state.analyzer.yMid);
       document.getElementById('lockedPeriodVal').textContent = Math.round(state.analyzer.period);
@@ -3686,8 +4227,25 @@
   }
 
   document.querySelectorAll('.w-step').forEach((btn) => {
-    btn.addEventListener('click', () => setCalibrationStep(btn.dataset.calstep));
+    btn.addEventListener('click', () => {
+      const targetStep = btn.dataset.calstep;
+      if (targetStep !== 'perspective' && !isConvexQuad(state.analyzer.quadPts)) {
+        showToast('Please uncross the 4 corners of the quadrilateral first.');
+        return;
+      }
+      setCalibrationStep(targetStep);
+    });
   });
+
+  function resetDefaultQuad() {
+    state.analyzer.quadPts = [
+      { x: 0.12, y: 0.20 },
+      { x: 0.88, y: 0.20 },
+      { x: 0.88, y: 0.80 },
+      { x: 0.12, y: 0.80 }
+    ];
+    state.analyzer.quadDirty = true;
+  }
 
   function loadAnalyzerPhotoFile(file) {
     if (!file) return;
@@ -3695,14 +4253,14 @@
     reader.onload = (ev) => {
       const img = new Image();
       img.onload = () => {
-        const dpr = window.devicePixelRatio || 1;
-        const cssH = analyzerCanvas.height / dpr;
+        cacheRawPhotoPixels(img);
+        resetDefaultQuad();
 
         state.analyzer.rawPhotoImg = img;
         state.analyzer.sourceMode = 'photo';
         state.analyzer.isMystery = false;
         state.analyzer.straightenDeg = 0;
-        state.analyzer.yMid = cssH / 2;
+        state.analyzer.yMid = ANALYZER_H / 2;
         state.analyzer.calPeriodDragX = 140;
         state.analyzer.period = 140;
         state.analyzer.manualOffsetX = 0;
@@ -3720,9 +4278,7 @@
         updateMarkedCountUI();
         syncScrubberUI();
         updateAnalyzerBadge();
-        rebuildStraightenedPhoto();
-        rebuildAnalyzerBuffers();
-        setCalibrationStep('straighten');
+        setCalibrationStep('perspective');
       };
       img.src = ev.target.result;
     };
@@ -3739,6 +4295,39 @@
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
       loadAnalyzerPhotoFile(e.dataTransfer.files[0]);
     }
+  });
+
+  // Step 1 (Perspective Quad) buttons
+  document.getElementById('quadResetBtn').addEventListener('click', () => {
+    resetDefaultQuad();
+    renderAnalyzer();
+  });
+
+  document.getElementById('quadFullBtn').addEventListener('click', () => {
+    state.analyzer.quadPts = [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 }
+    ];
+    state.analyzer.quadDirty = true;
+    renderAnalyzer();
+  });
+
+  document.getElementById('toStraightenStepBtn').addEventListener('click', () => {
+    if (!isConvexQuad(state.analyzer.quadPts)) {
+      showToast('Please uncross the 4 corners of the quadrilateral first.');
+      return;
+    }
+    state.analyzer.straightenDeg = 0;
+    document.getElementById('straightenAngleSlider').value = 0;
+    document.getElementById('straightenAngleVal').textContent = '0.0\u00b0';
+    state.analyzer.quadDirty = true;
+    setCalibrationStep('straighten');
+  });
+
+  document.getElementById('backToQuadBtn').addEventListener('click', () => {
+    setCalibrationStep('perspective');
   });
 
   function updateStraightenAngle(deg) {
@@ -3784,7 +4373,6 @@
     renderAnalyzer();
   });
   document.getElementById('midlineCenterBtn').addEventListener('click', () => {
-    const dpr = window.devicePixelRatio || 1;
     state.analyzer.yMid = ANALYZER_H / 2;
     renderAnalyzer();
   });
@@ -3826,11 +4414,10 @@
   });
 
   document.getElementById('recalibrateBtn').addEventListener('click', () => {
-    setCalibrationStep('straighten');
+    setCalibrationStep('perspective');
   });
 
   document.getElementById('clearPhotoBtn').addEventListener('click', () => {
-    const dpr = window.devicePixelRatio || 1;
     state.analyzer.sourceMode = 'builtin';
     state.analyzer.period = 170;
     state.analyzer.yMid = ANALYZER_H / 2;
@@ -3918,7 +4505,6 @@
     closeSaveModal();
   });
 
-  // Save from Tab 1 (Adaptive Motif Frieze Generator)
   document.getElementById('qSavePatternBtn').addEventListener('click', () => {
     const gCode = state.quarter.group;
     const gObj = FRIEZE_GROUPS[gCode];
@@ -3926,7 +4512,6 @@
       const tileH = 220;
       const { periodL } = getAdaptiveTileMetrics(tileH, gCode);
 
-      // Render 1 exact repeating tile (periodL x tileH)
       const tileCvs = document.createElement('canvas');
       tileCvs.width = periodL;
       tileCvs.height = tileH;
@@ -3935,7 +4520,6 @@
       tCtx.fillRect(0, 0, periodL, tileH);
       renderAdaptiveFriezeStrip(tCtx, 0, periodL, tileH, gCode, false, null);
 
-      // Render wide strip preview for the library card
       const prevCvs = document.createElement('canvas');
       prevCvs.width = 360;
       prevCvs.height = 90;
@@ -3957,16 +4541,13 @@
     });
   });
 
-  // Save from Tab 2 (Calibrated Uploaded Photo)
   document.getElementById('saveCalibratedPhotoBtn').addEventListener('click', () => {
     if (!state.analyzer.rawPhotoImg) return;
     openSaveModal(`Calibrated Photo ${state.savedPatterns.length + 1}`, (name) => {
       const dpr = window.devicePixelRatio || 1;
-      const cssW = analyzerCanvas.width / dpr;
       const cssH = analyzerCanvas.height / dpr;
       const L = state.analyzer.period;
 
-      // Make sure photoTileLeft/Width are up to date
       const tmpCvs = document.createElement('canvas');
       tmpCvs.width = L;
       tmpCvs.height = cssH;
@@ -4003,7 +4584,6 @@
     });
   });
 
-  // Save from Tab 3 (Freehand Sketchpad)
   document.getElementById('saveSketchpadPatternBtn').addEventListener('click', () => {
     if (state.creator.strokes.length === 0) {
       showToast('Draw a pattern on the sketchpad first before saving!');
@@ -4048,7 +4628,6 @@
     if (!savedEntry) return;
     const img = new Image();
     img.onload = () => {
-      const dpr = window.devicePixelRatio || 1;
       const cssH = ANALYZER_H;
 
       state.activeSavedPattern = {
@@ -4105,7 +4684,6 @@
     const list = state.savedPatterns;
     document.getElementById('savedPatternsCountLabel').textContent = list.length;
 
-    // 1. Update <optgroup label="My Saved Patterns (Local Storage)"> in Analyser select
     const optgroup = document.getElementById('savedPatternsOptgroup');
     optgroup.innerHTML = '';
     if (list.length === 0) {
@@ -4123,7 +4701,6 @@
       });
     }
 
-    // 2. Update Saved Patterns Drawer Grid
     const grid = document.getElementById('savedPatternsGrid');
     grid.innerHTML = '';
     if (list.length === 0) {
@@ -4270,16 +4847,6 @@
     });
   });
 
-  document.querySelectorAll('.snap-axis').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.analyzer.baseAxisFrac = parseFloat(btn.dataset.frac);
-      state.analyzer.manualOffsetX = 0;
-      state.analyzer.progress = 1;
-      syncScrubberUI();
-      renderAnalyzer();
-    });
-  });
-
   document.getElementById('nudgeCopyLeftBtn').addEventListener('click', () => {
     if (state.analyzer.progress < 0.05) state.analyzer.progress = 1;
     state.analyzer.manualOffsetX -= 2;
@@ -4298,7 +4865,7 @@
     const badge = document.getElementById('analyzerPatternBadge');
     if (state.analyzer.sourceMode === 'photo') {
       badge.className = 'badge success';
-      badge.textContent = 'Uploaded Frieze Photo (Extended)';
+      badge.textContent = 'Uploaded Frieze Photo (Rectified & Extended)';
     } else if (state.analyzer.sourceMode === 'saved' && state.activeSavedPattern) {
       badge.className = 'badge purple';
       badge.textContent = `Saved: ${state.activeSavedPattern.name}`;
@@ -4320,7 +4887,6 @@
   }
 
   function loadRandomMystery() {
-    const dpr = window.devicePixelRatio || 1;
     const codes = Object.keys(FRIEZE_GROUPS);
     let pick = codes[Math.floor(Math.random() * codes.length)];
     if (pick === state.analyzer.mysteryGroup && codes.length > 1) {
@@ -4354,7 +4920,6 @@
       return;
     }
 
-    const dpr = window.devicePixelRatio || 1;
     state.analyzer.sourceMode = 'builtin';
     state.analyzer.period = 170;
     state.analyzer.yMid = ANALYZER_H / 2;
@@ -4458,7 +5023,6 @@
     document.getElementById('quarterPhotoControls').style.display = 'none';
     document.getElementById('quarterDrawTools').style.display = 'block';
     state.quarter.strokes = [
-      // Vertical stem of F
       {
         color: '#1e3a8a',
         size: 11,
@@ -4467,7 +5031,6 @@
           { x: 0.30, y: 0.16 }
         ]
       },
-      // Top horizontal bar of F
       {
         color: '#1e3a8a',
         size: 11,
@@ -4476,7 +5039,6 @@
           { x: 0.76, y: 0.16 }
         ]
       },
-      // Middle horizontal bar of F
       {
         color: '#be123c',
         size: 10,
@@ -4686,7 +5248,7 @@
     document.getElementById('qViewAll7Btn').classList.remove('active-pill');
     document.getElementById('quarterSinglePanel').style.display = 'block';
     document.getElementById('quarterAll7Panel').style.display = 'none';
-    resizeAllCanvases();
+    renderQuarterOutput();
   });
 
   document.getElementById('qViewAll7Btn').addEventListener('click', () => {
@@ -4703,29 +5265,106 @@
   });
 
   document.getElementById('qDownloadPngBtn').addEventListener('click', () => {
-    const prev = state.quarter.showRectGrid;
-    state.quarter.showRectGrid = false;
-    renderQuarterOutput();
     const link = document.createElement('a');
     link.download = `frieze-${state.quarter.group}.png`;
     link.href = quarterOutputCanvas.toDataURL('image/png');
     link.click();
-    state.quarter.showRectGrid = prev;
-    renderQuarterOutput();
   });
 
   /* ==========================================================================
-     18. TAB 3: CONTINUOUS FRIEZE SKETCHPAD
+     18. TAB 3: FREEHAND FRIEZE SKETCHPAD
      ========================================================================== */
+  function drawCreatorGuides(ctx, cssW, cssH, period, groupCode) {
+    const yMid = cssH / 2;
+    const halfH = cssH * 0.42;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(5, 150, 105, 0.06)';
+    if (groupCode === 'p1') {
+      ctx.fillRect(0, yMid - halfH, period, halfH * 2);
+    } else if (groupCode === 'p11g' || groupCode === 'p1m1' || groupCode === 'p2') {
+      ctx.fillRect(0, yMid - halfH, period / 2, halfH * 2);
+    } else if (groupCode === 'p11m') {
+      ctx.fillRect(0, yMid - halfH, period, halfH);
+    } else {
+      ctx.fillRect(0, yMid - halfH, period / 2, halfH);
+    }
+
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, yMid - halfH);
+    ctx.lineTo(cssW, yMid - halfH);
+    ctx.moveTo(0, yMid + halfH);
+    ctx.lineTo(cssW, yMid + halfH);
+    ctx.stroke();
+
+    for (let x = 0; x <= cssW + period; x += period) {
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, cssH);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    const g = FRIEZE_GROUPS[groupCode];
+
+    if (g.symmetries.H) {
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([7, 5]);
+      ctx.beginPath();
+      ctx.moveTo(0, yMid);
+      ctx.lineTo(cssW, yMid);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (g.symmetries.G) {
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([3, 5]);
+      ctx.beginPath();
+      ctx.moveTo(0, yMid);
+      ctx.lineTo(cssW, yMid);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    if (g.symmetries.V) {
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 4]);
+      for (let x = 0; x <= cssW + period; x += period / 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, 8);
+        ctx.lineTo(x, cssH - 8);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+
+    if (g.symmetries.R) {
+      ctx.fillStyle = '#e11d48';
+      const offset = groupCode === 'p2mg' ? period * 0.25 : 0;
+      for (let x = offset; x <= cssW + period; x += period / 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, yMid - 6);
+        ctx.lineTo(x + 6, yMid);
+        ctx.lineTo(x, yMid + 6);
+        ctx.lineTo(x - 6, yMid);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+  }
+
   function renderCreator() {
     const dpr = window.devicePixelRatio || 1;
     const cssW = creatorCanvas.width / dpr;
     const cssH = creatorCanvas.height / dpr;
-    const L = state.creator.period;
-    const yMid = cssH / 2;
-    const halfH = cssH * 0.42;
-    const groupCode = state.creator.group;
-    const groupObj = FRIEZE_GROUPS[groupCode];
 
     creatorCtx.save();
     creatorCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -4734,160 +5373,90 @@
     creatorCtx.fillRect(0, 0, cssW, cssH);
 
     if (state.creator.showGuides) {
-      drawCreatorGuides(creatorCtx, cssW, cssH, yMid, halfH, L, groupCode);
+      drawCreatorGuides(creatorCtx, cssW, cssH, state.creator.period, state.creator.group);
     }
 
-    const allStrokes = state.creator.currentStroke
+    const activeStrokes = state.creator.currentStroke
       ? [...state.creator.strokes, state.creator.currentStroke]
       : state.creator.strokes;
 
-    renderStrokesWithSymmetry(
-      creatorCtx,
-      -1,
-      Math.ceil(cssW / L) + 1,
-      yMid,
-      halfH,
-      L,
-      groupObj,
-      allStrokes,
-      null
-    );
+    if (activeStrokes.length > 0) {
+      renderFriezeStrip(
+        creatorCtx, 0, cssW, cssH,
+        state.creator.period, state.creator.group, null, null, activeStrokes
+      );
+    } else {
+      creatorCtx.fillStyle = '#94a3b8';
+      creatorCtx.font = '14px sans-serif';
+      creatorCtx.textAlign = 'center';
+      creatorCtx.fillText(
+        'Draw anywhere on this strip — your pattern updates across all symmetric copies in real time!',
+        cssW / 2,
+        cssH / 2 + 5
+      );
+    }
 
     creatorCtx.restore();
   }
 
-  function drawCreatorGuides(ctx, cssW, cssH, yMid, halfH, L, groupCode) {
-    ctx.save();
-    ctx.fillStyle = 'rgba(5, 150, 105, 0.08)';
-    if (groupCode === 'p1') ctx.fillRect(0, yMid - halfH, L, halfH * 2);
-    else if (groupCode === 'p11m') ctx.fillRect(0, yMid - halfH, L, halfH);
-    else if (groupCode === 'p11g' || groupCode === 'p1m1' || groupCode === 'p2') ctx.fillRect(0, yMid - halfH, L / 2, halfH * 2);
-    else if (groupCode === 'p2mm') ctx.fillRect(0, yMid - halfH, L / 2, halfH);
-    else if (groupCode === 'p2mg') ctx.fillRect(0, yMid - halfH, L / 4, halfH * 2);
-
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= cssW; x += L) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, cssH);
-      ctx.stroke();
-    }
-
-    if (groupCode === 'p11m' || groupCode === 'p2mm') {
-      ctx.strokeStyle = '#2563eb';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath();
-      ctx.moveTo(0, yMid);
-      ctx.lineTo(cssW, yMid);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    if (groupCode === 'p11g' || groupCode === 'p2mg') {
-      ctx.strokeStyle = '#d97706';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([3, 4]);
-      ctx.beginPath();
-      ctx.moveTo(0, yMid);
-      ctx.lineTo(cssW, yMid);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    if (groupCode === 'p1m1' || groupCode === 'p2mg' || groupCode === 'p2mm') {
-      ctx.strokeStyle = '#2563eb';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      for (let x = 0; x <= cssW; x += L / 2) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, cssH);
-        ctx.stroke();
-      }
-      ctx.setLineDash([]);
-    }
-
-    if (groupCode === 'p2' || groupCode === 'p2mm' || groupCode === 'p2mg') {
-      const startOffset = groupCode === 'p2mg' ? L / 4 : 0;
-      ctx.fillStyle = '#e11d48';
-      for (let x = startOffset; x <= cssW + L; x += L / 2) {
-        ctx.beginPath();
-        ctx.moveTo(x, yMid - 7);
-        ctx.lineTo(x + 7, yMid);
-        ctx.lineTo(x, yMid + 7);
-        ctx.lineTo(x - 7, yMid);
-        ctx.closePath();
-        ctx.fill();
-      }
-    }
-    ctx.restore();
-  }
-
-  function updateCreatorInfo() {
-    const g = FRIEZE_GROUPS[state.creator.group];
-    document.getElementById('creatorGroupInfo').textContent = `Active: ${g.code} (${g.name})`;
-  }
-
-  function creatorPointFromEvent(e) {
+  function creatorPosToUV(clientX, clientY) {
     const rect = creatorCanvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const cssW = creatorCanvas.width / dpr;
     const cssH = creatorCanvas.height / dpr;
-    const x = (e.clientX - rect.left) * (cssW / rect.width);
-    const y = (e.clientY - rect.top) * (cssH / rect.height);
+    const px = (clientX - rect.left) * (cssW / rect.width);
+    const py = (clientY - rect.top) * (cssH / rect.height);
+    const yMid = cssH / 2;
     const halfH = cssH * 0.42;
-    const v = Math.max(-1, Math.min(1, (cssH / 2 - y) / halfH));
-    return { u: x / state.creator.period, v };
+    return {
+      u: px / state.creator.period,
+      v: (yMid - py) / halfH
+    };
   }
-
-  creatorCanvas.style.touchAction = 'none';
 
   creatorCanvas.addEventListener('pointerdown', (e) => {
     creatorCanvas.setPointerCapture(e.pointerId);
     state.creator.isDrawing = true;
-    const pt = creatorPointFromEvent(e);
+    const uv = creatorPosToUV(e.clientX, e.clientY);
     state.creator.currentStroke = {
       tool: state.creator.tool,
       color: state.creator.color,
       size: state.creator.brushSize,
-      points: [pt]
+      points: [uv]
     };
     renderCreator();
   });
 
   creatorCanvas.addEventListener('pointermove', (e) => {
     if (!state.creator.isDrawing || !state.creator.currentStroke) return;
-    const pt = creatorPointFromEvent(e);
-    const stroke = state.creator.currentStroke;
-    if (stroke.tool === 'brush') {
-      stroke.points.push(pt);
+    const uv = creatorPosToUV(e.clientX, e.clientY);
+    const tool = state.creator.currentStroke.tool;
+    if (tool === 'brush') {
+      state.creator.currentStroke.points.push(uv);
     } else {
-      stroke.points = [stroke.points[0], pt];
+      state.creator.currentStroke.points = [state.creator.currentStroke.points[0], uv];
     }
     renderCreator();
   });
 
-  function finishCreatorStroke(e) {
+  creatorCanvas.addEventListener('pointerup', (e) => {
     if (!state.creator.isDrawing) return;
     state.creator.isDrawing = false;
     try { creatorCanvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     if (state.creator.currentStroke) {
       state.creator.strokes.push(state.creator.currentStroke);
       state.creator.currentStroke = null;
+      renderCreator();
     }
-    renderCreator();
-  }
-  creatorCanvas.addEventListener('pointerup', finishCreatorStroke);
-  creatorCanvas.addEventListener('pointercancel', finishCreatorStroke);
+  });
 
   document.querySelectorAll('#creatorGroupSelector .group-option').forEach((opt) => {
     opt.addEventListener('click', () => {
       document.querySelectorAll('#creatorGroupSelector .group-option').forEach((o) => o.classList.remove('selected'));
       opt.classList.add('selected');
       state.creator.group = opt.dataset.group;
-      updateCreatorInfo();
+      const g = FRIEZE_GROUPS[state.creator.group];
+      document.getElementById('creatorGroupInfo').textContent = `Active: ${g.code} (${g.name})`;
       renderCreator();
     });
   });
@@ -4924,13 +5493,12 @@
 
   document.getElementById('clearCanvasBtn').addEventListener('click', () => {
     state.creator.strokes = [];
-    state.creator.currentStroke = null;
     renderCreator();
   });
 
   document.getElementById('sendToAnalyzerBtn').addEventListener('click', () => {
     if (state.creator.strokes.length === 0) {
-      document.getElementById('creatorGroupInfo').textContent = 'Draw something first, then send it to the Analyser!';
+      showToast('Draw a pattern on the sketchpad first before testing it!');
       return;
     }
     state.analyzer.sourceMode = 'custom';
@@ -4940,9 +5508,7 @@
     state.analyzer.manualOffsetX = 0;
     state.analyzer.progress = 0;
     state.analyzer.markedSymmetries = [];
-    state.analyzer.isSnapped = false;
     document.getElementById('photoCalibrationWizard').classList.remove('visible');
-    setCalibrationStep('analyze');
     resetChecklist();
     updateMarkedCountUI();
     syncScrubberUI();
@@ -4953,28 +5519,68 @@
   });
 
   document.getElementById('downloadPngBtn').addEventListener('click', () => {
-    const prev = state.creator.showGuides;
-    state.creator.showGuides = false;
-    renderCreator();
     const link = document.createElement('a');
-    link.download = `sketchpad-frieze-${state.creator.group}.png`;
+    link.download = `frieze-sketch-${state.creator.group}.png`;
     link.href = creatorCanvas.toDataURL('image/png');
     link.click();
-    state.creator.showGuides = prev;
-    renderCreator();
   });
 
   /* ==========================================================================
-     19. TAB SWITCHING
+     19. TAB 4: MYSTERY LAB & TAB NAVIGATION
      ========================================================================== */
-  function switchTab(name) {
-    if (state.activeTab === 'analyzer' && name !== 'analyzer') pauseAnimation();
-    state.activeTab = name;
-    document.querySelectorAll('nav.tabs button').forEach((b) => {
-      b.classList.toggle('active', b.dataset.tab === name);
+  document.getElementById('launchChallengeBtn').addEventListener('click', () => {
+    loadRandomMystery();
+    switchTab('analyzer');
+  });
+
+  document.getElementById('submitGuessBtn').addEventListener('click', () => {
+    const guess = document.getElementById('challengeGuessSelect').value;
+    const feedback = document.getElementById('challengeFeedback');
+    if (!guess) {
+      feedback.style.display = 'block';
+      feedback.className = 'deduction-box';
+      feedback.textContent = 'Please select a Frieze group from the dropdown first.';
+      return;
+    }
+
+    if (!state.analyzer.isMystery || state.analyzer.sourceMode !== 'builtin') {
+      loadRandomMystery();
+    }
+
+    const target = state.analyzer.mysteryGroup;
+    const targetObj = FRIEZE_GROUPS[target];
+    feedback.style.display = 'block';
+
+    if (!state.lab.solvedCurrent) {
+      state.lab.attempts++;
+    }
+
+    if (guess === target) {
+      if (!state.lab.solvedCurrent) {
+        state.lab.score++;
+        state.lab.solvedCurrent = true;
+      }
+      feedback.className = 'deduction-box match';
+      feedback.innerHTML =
+        `<strong>Correct!</strong> The mystery pattern belongs to group <code>${targetObj.code}</code> (<strong>${targetObj.name}</strong>: ${targetObj.desc}).`;
+    } else {
+      const guessObj = FRIEZE_GROUPS[guess];
+      feedback.className = 'deduction-box invalid';
+      feedback.innerHTML =
+        `<strong>Not quite!</strong> You guessed <code>${guessObj.code}</code> (${guessObj.name}), which has <em>${guessObj.desc}</em>. ` +
+        `Return to the Symmetry Analyser, drag the overlays until the symmetry lines click into place, and check H, V, R, and G again.`;
+    }
+
+    document.getElementById('challengeScoreBadge').textContent = `Score: ${state.lab.score} / ${state.lab.attempts}`;
+  });
+
+  function switchTab(tabName) {
+    state.activeTab = tabName;
+    document.querySelectorAll('nav.tabs button').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
-    document.querySelectorAll('.tab-panel').forEach((p) => {
-      p.classList.toggle('active', p.id === 'tab-' + name);
+    document.querySelectorAll('.tab-panel').forEach((panel) => {
+      panel.classList.toggle('active', panel.id === 'tab-' + tabName);
     });
     resizeAllCanvases();
   }
@@ -4984,71 +5590,12 @@
   });
 
   /* ==========================================================================
-     20. TAB 4: MYSTERY LAB
+     20. INITIALIZATION
      ========================================================================== */
-  function updateScoreBadge() {
-    document.getElementById('challengeScoreBadge').textContent =
-      `Score: ${state.lab.score} / ${state.lab.attempts}`;
-  }
-
-  document.getElementById('launchChallengeBtn').addEventListener('click', () => {
-    loadRandomMystery();
-    document.getElementById('challengeGuessSelect').value = '';
-    const fb = document.getElementById('challengeFeedback');
-    fb.style.display = 'none';
-    fb.textContent = '';
-    switchTab('analyzer');
-  });
-
-  document.getElementById('submitGuessBtn').addEventListener('click', () => {
-    const fb = document.getElementById('challengeFeedback');
-    const guess = document.getElementById('challengeGuessSelect').value;
-    fb.style.display = 'block';
-
-    if (!state.analyzer.isMystery) {
-      fb.className = 'deduction-box';
-      fb.innerHTML = 'Load a Mystery Pattern in the Analyser first, using the button above.';
-      return;
-    }
-    if (!guess) {
-      fb.className = 'deduction-box';
-      fb.innerHTML = 'Pick a Frieze group from the drop-down first.';
-      return;
-    }
-    if (state.lab.solvedCurrent) {
-      fb.className = 'deduction-box match';
-      fb.innerHTML = 'You already solved this one! Load a new Mystery Pattern to keep playing.';
-      return;
-    }
-
-    const answer = state.analyzer.mysteryGroup;
-    state.lab.attempts++;
-    if (guess === answer) {
-      state.lab.score++;
-      state.lab.solvedCurrent = true;
-      const g = FRIEZE_GROUPS[answer];
-      fb.className = 'deduction-box match';
-      fb.innerHTML = `<strong>Correct!</strong> It is <code>${g.code}</code> (${g.name}): ${g.desc}.`;
-    } else {
-      fb.className = 'deduction-box invalid';
-      fb.innerHTML = '<strong>Not quite.</strong> Go back to the Analyser and test each symmetry again, then try another guess.';
-    }
-    updateScoreBadge();
-  });
-
-  /* ==========================================================================
-     21. INITIALISATION
-     ========================================================================== */
-  loadDefaultQuarterMotif();
+  loadLetterFMotif();
   refreshSavedPatternsUI();
-  updateCreatorInfo();
-  updateScoreBadge();
-  updateAnalyzerBadge();
-  resetChecklist();
-  updateMarkedCountUI();
-  syncScrubberUI();
   resizeAllCanvases();
-  window.addEventListener('load', resizeAllCanvases);
+  updateAnalyzerBadge();
 })();
 </script>
 <script src="https://nugget-maths.co.nz/notice.js" defer></script>
