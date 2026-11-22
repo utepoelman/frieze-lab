@@ -1,0 +1,5056 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- © Ute Poelman. All rights reserved. Terms of use: https://nugget-maths.co.nz/#terms -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frieze Pattern Symmetry Lab</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #dce3ee;
+      --text: #1e293b;
+      --text-muted: #526077;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --accent: #e11d48;
+      --accent-light: #fff1f2;
+      --success: #059669;
+      --success-light: #ecfdf5;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --radius: 12px;
+      --shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: #fff;
+      padding: 1.15rem 1.5rem;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.18);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.38rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 0.87rem;
+      color: #cbd5e1;
+    }
+
+    nav.tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 0.35rem;
+      border-radius: 10px;
+    }
+
+    nav.tabs button {
+      border: none;
+      background: transparent;
+      color: #e2e8f0;
+      padding: 0.5rem 0.9rem;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    nav.tabs button:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    nav.tabs button.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    main {
+      max-width: 1320px;
+      margin: 1.35rem auto;
+      padding: 0 1.25rem 3rem;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.2rem;
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.95rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h2 {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    .badge.mystery {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .badge.success {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .badge.purple {
+      background: var(--purple-light);
+      color: var(--purple);
+    }
+
+    /* Controls & Buttons */
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.28rem;
+    }
+
+    .control-group label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    select, input[type="number"], input[type="text"] {
+      padding: 0.46rem 0.72rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.87rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input[type="range"] {
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.38rem;
+      padding: 0.46rem 0.86rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--surface-alt);
+      border-color: #b8c4d6;
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn.accent {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn.accent:hover {
+      background: #be123c;
+    }
+
+    .btn.success {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
+    }
+
+    .btn.success:hover {
+      background: #047857;
+    }
+
+    .btn.purple {
+      background: var(--purple);
+      color: #fff;
+      border-color: var(--purple);
+    }
+
+    .btn.purple:hover {
+      background: #6d28d9;
+    }
+
+    .btn.active-pill {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .btn.sm {
+      padding: 0.32rem 0.6rem;
+      font-size: 0.78rem;
+    }
+
+    /* Guided Photo Calibration Wizard Banner */
+    .calibration-wizard {
+      background: linear-gradient(135deg, #f0f9ff 0%, #eff6ff 100%);
+      border: 1.5px solid #93c5fd;
+      border-radius: 11px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.9rem;
+      display: none;
+    }
+
+    .calibration-wizard.visible {
+      display: block;
+    }
+
+    .wizard-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .w-step {
+      padding: 0.32rem 0.72rem;
+      border-radius: 999px;
+      font-size: 0.79rem;
+      font-weight: 700;
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      color: #475569;
+      cursor: pointer;
+    }
+
+    .w-step.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .w-step.done {
+      background: var(--success-light);
+      color: var(--success);
+      border-color: #6ee7b7;
+    }
+
+    .wizard-body {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+    }
+
+    .wizard-instructions {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .wizard-instructions h3 {
+      font-size: 0.95rem;
+      color: #0f172a;
+      margin-bottom: 0.2rem;
+    }
+
+    .wizard-instructions p {
+      font-size: 0.83rem;
+      color: #334155;
+    }
+
+    .wizard-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    /* Canvas Wrapper */
+    .canvas-stage {
+      position: relative;
+      width: 100%;
+      background: #ffffff;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0.65rem 0;
+      user-select: none;
+      touch-action: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .canvas-stage.snapped {
+      border-color: var(--success);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
+    }
+
+    .canvas-stage.draggable {
+      cursor: grab;
+    }
+
+    .canvas-stage.draggable:active {
+      cursor: grabbing;
+    }
+
+    .canvas-stage.crosshair {
+      cursor: crosshair;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+    }
+
+    .canvas-hint {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.81rem;
+      color: var(--text-muted);
+      background: var(--surface-alt);
+      padding: 0.52rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* Symmetry Transform Grid */
+    .transform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 0.6rem;
+      margin: 0.65rem 0;
+    }
+
+    .transform-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem;
+      background: var(--surface-alt);
+      cursor: pointer;
+      transition: all 0.16s ease;
+      text-align: left;
+    }
+
+    .transform-card:hover {
+      border-color: #93c5fd;
+      background: #fff;
+    }
+
+    .transform-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+    }
+
+    .transform-card .t-title {
+      font-weight: 700;
+      font-size: 0.89rem;
+      color: #0f172a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .transform-card .t-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.22rem;
+    }
+
+    /* Two-column layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.2rem;
+    }
+
+    .grid-quarter {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .grid-2, .grid-quarter {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Checklist & Classifier */
+    .check-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    .check-table th, .check-table td {
+      padding: 0.52rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .yn-group {
+      display: inline-flex;
+      gap: 0.3rem;
+    }
+
+    .yn-btn {
+      padding: 0.24rem 0.62rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .yn-btn.yes.active {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
+    }
+
+    .yn-btn.no.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .deduction-box {
+      margin-top: 0.8rem;
+      padding: 0.82rem 0.95rem;
+      border-radius: 9px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      font-size: 0.87rem;
+    }
+
+    .deduction-box.match {
+      background: var(--success-light);
+      border-color: #6ee7b7;
+      color: #065f46;
+    }
+
+    .deduction-box.invalid {
+      background: var(--accent-light);
+      border-color: #fda4af;
+      color: #9f1239;
+    }
+
+    /* Group Selector */
+    .group-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 0.55rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .group-option {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 0.72rem;
+      background: var(--surface-alt);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .group-option:hover {
+      border-color: #93c5fd;
+      background: #fff;
+    }
+
+    .group-option.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .group-option .g-code {
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: var(--primary-dark);
+    }
+
+    .group-option .g-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .group-option .g-syms {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.18rem;
+    }
+
+    /* Adaptive Tile Diagram Pill Grid */
+    .quarter-map {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem;
+      background: #f1f5f9;
+      padding: 0.45rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 0.55rem;
+    }
+
+    .quarter-map.cols-1 {
+      grid-template-columns: 1fr;
+    }
+
+    .q-cell {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.5rem;
+      font-size: 0.76rem;
+      text-align: center;
+    }
+
+    .q-cell.source {
+      background: var(--success-light);
+      border-color: #6ee7b7;
+      font-weight: 700;
+      color: #065f46;
+    }
+
+    /* All-7 Gallery Cards */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.85rem;
+    }
+
+    .gallery-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 0.85rem;
+      background: var(--surface-alt);
+    }
+
+    .gallery-item-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .swatch-row {
+      display: flex;
+      align-items: center;
+      gap: 0.38rem;
+    }
+
+    .swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.12s;
+    }
+
+    .swatch:hover {
+      transform: scale(1.12);
+    }
+
+    .swatch.active {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 2px #fff inset;
+    }
+
+    /* Saved Patterns Library Drawer & Cards */
+    .saved-library-drawer {
+      background: var(--surface-alt);
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.9rem;
+      display: none;
+    }
+
+    .saved-library-drawer.visible {
+      display: block;
+    }
+
+    .saved-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.65rem;
+      margin-top: 0.65rem;
+    }
+
+    .saved-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 0.55rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+    }
+
+    .saved-card img {
+      width: 100%;
+      height: 54px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+    }
+
+    /* Inline Save Pattern Modal Popover */
+    .save-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .save-modal-backdrop.visible {
+      display: flex;
+    }
+
+    .save-modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+      border: 1px solid var(--border);
+    }
+
+    .save-modal h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+      color: #0f172a;
+    }
+
+    .save-modal p {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+    }
+
+    /* Non-blocking Toast Banner */
+    .toast-banner {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      background: #0f172a;
+      color: #fff;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.28);
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .toast-banner.visible {
+      display: flex;
+    }
+
+    /* Reference Table */
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    .ref-table th {
+      background: var(--surface-alt);
+      color: #0f172a;
+      font-weight: 700;
+      padding: 0.62rem 0.7rem;
+      border-bottom: 2px solid var(--border);
+      text-align: left;
+    }
+
+    .ref-table td {
+      padding: 0.62rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sym-pill {
+      display: inline-block;
+      padding: 0.14rem 0.44rem;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 0.2rem;
+    }
+
+    .sym-yes {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .sym-no {
+      background: #f1f5f9;
+      color: #94a3b8;
+    }
+
+    .mission-banner {
+      background: linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .mark-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      padding: 0.6rem 0.85rem;
+      border-radius: 9px;
+      margin-top: 0.6rem;
+    }
+
+    kbd {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.78rem;
+      font-family: monospace;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Frieze Pattern Symmetry Lab</h1>
+      <p>Construct all 7 frieze groups with adaptive tile scaling or calibrate &amp; analyse symmetries on frieze photos</p>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="active" data-tab="quarter">1. Motif Frieze Generator</button>
+      <button data-tab="analyzer">2. Photo &amp; Symmetry Analyser</button>
+      <button data-tab="creator">3. Freehand Frieze Sketchpad</button>
+      <button data-tab="lab">4. Mystery Lab &amp; Reference</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ==================== TAB 1: ADAPTIVE MOTIF FRIEZE GENERATOR (ACTIVITY 1) ==================== -->
+  <section id="tab-quarter" class="tab-panel active">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Activity 1: Build All 7 Frieze Groups from an Uploaded Image or Motif</h2>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button class="btn active-pill" id="qViewSingleBtn">Single Group View</button>
+          <button class="btn" id="qViewAll7Btn">Compare All 7 Groups Side-by-Side</button>
+        </div>
+      </div>
+
+      <p style="font-size:0.87rem; color:var(--text-muted); margin-bottom:1rem;">
+        Upload an image (such as a letter <strong>F</strong>) or draw a motif. The generator automatically scales your image to fit the required symmetries: <strong>100% (1&times;1 full tile)</strong> when no horizontal mirror is needed (<code>p1</code>, <code>p11g</code>, <code>p1m1</code>, <code>p2</code>), or <strong>shrunk by 1/2 in both directions (1/2&times;1/2)</strong> whenever a horizontal reflection or 4-part cell is needed (<code>p11m</code>, <code>p2mg</code>, <code>p2mm</code>).
+      </p>
+
+      <div class="grid-quarter">
+        <!-- Left Column: Motif Input (Upload OR Draw) -->
+        <div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; padding:0.9rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; gap:0.4rem;">
+            <strong style="font-size:0.9rem; color:#0f172a;">Source Motif / Image</strong>
+            <span class="badge success" id="qScaleBadge">Scale: 1/2 &times; 1/2</span>
+          </div>
+
+          <div class="control-group" style="margin-bottom:0.65rem;">
+            <label for="quarterPhotoUpload">Upload Image (or drag onto box below)</label>
+            <input type="file" id="quarterPhotoUpload" accept="image/*" />
+          </div>
+
+          <div id="quarterPhotoControls" style="display:none; margin-bottom:0.65rem; padding:0.55rem; background:#fff; border-radius:8px; border:1px solid var(--border);">
+            <div style="display:flex; flex-wrap:wrap; gap:0.38rem; align-items:center; justify-content:space-between; margin-bottom:0.45rem;">
+              <button class="btn sm" id="qRotateTileBtn">&#8635; Rotate 90&deg;</button>
+              <button class="btn sm" id="qFlipTileBtn">&#8596; Flip Source</button>
+              <button class="btn sm" id="qClearPhotoBtn">Switch to Drawing</button>
+            </div>
+            <label style="font-size:0.77rem; font-weight:600; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem;">
+              Zoom:
+              <input type="range" id="qPhotoZoomSlider" min="60" max="200" value="100" style="flex:1;" />
+              <span id="qPhotoZoomVal">100%</span>
+            </label>
+          </div>
+
+          <!-- Drawing Tools -->
+          <div id="quarterDrawTools" style="margin-bottom:0.55rem;">
+            <div id="qToolRow" style="display:flex; flex-wrap:wrap; gap:0.3rem; align-items:center; margin-bottom:0.45rem;">
+              <button class="btn sm active-pill" data-qtool="brush">&#9998; Brush</button>
+              <button class="btn sm" data-qtool="line">&#9585; Line</button>
+              <button class="btn sm" data-qtool="rect">&#9645; Rectangle</button>
+              <button class="btn sm" data-qtool="ellipse">&#9711; Ellipse</button>
+              <button class="btn sm" data-qtool="triangle">&#9651; Triangle</button>
+              <button class="btn sm" data-qtool="diamond">&#9671; Diamond</button>
+              <button class="btn sm" data-qtool="hexagon">&#11041; Hexagon</button>
+              <button class="btn sm" data-qtool="star">&#9734; Star</button>
+              <button class="btn sm" data-qtool="fill" title="Click inside a closed outline to fill it with the chosen colour">&#129699; Fill</button>
+              <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.25rem; cursor:pointer;"><input type="checkbox" id="qFillShapes" /> Filled shapes</label>
+              <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.25rem;">Thickness <input type="range" id="qSizeSlider" min="2" max="24" value="6" style="width:80px;" /></label>
+              <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.25rem;">Custom colour <input type="color" id="qCustomColor" value="#1e3a8a" style="width:30px; height:24px; padding:0; border:none; background:none;" /></label>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.35rem; align-items:center; justify-content:space-between; margin-bottom:0.4rem;">
+              <div class="swatch-row" id="qColorSwatches">
+                <button class="swatch active" data-color="#1e3a8a" style="background:#1e3a8a;"></button>
+                <button class="swatch" data-color="#be123c" style="background:#be123c;"></button>
+                <button class="swatch" data-color="#047857" style="background:#047857;"></button>
+                <button class="swatch" data-color="#b45309" style="background:#b45309;"></button>
+                <button class="swatch" data-color="#0f172a" style="background:#0f172a;"></button>
+                <button class="swatch" data-color="#f59e0b" style="background:#f59e0b;"></button>
+                <button class="swatch" data-color="#7c3aed" style="background:#7c3aed;"></button>
+                <button class="swatch" data-color="#0891b2" style="background:#0891b2;"></button>
+                <button class="swatch" data-color="#ec4899" style="background:#ec4899;"></button>
+                <button class="swatch" data-color="#ffffff" style="background:#ffffff; border:1px solid #94a3b8;" title="White (for cut-outs)"></button>
+              </div>
+              <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+                <button class="btn sm" id="qLetterFBtn" title="Draw asymmetric letter F">Letter F</button>
+                <button class="btn sm" id="qSampleMotifBtn" title="Draw sample asymmetric motif">&#10024; Scroll</button>
+                <button class="btn sm" id="qUndoBtn">&#8630;</button>
+                <button class="btn sm" id="qClearBtn">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Source Canvas -->
+          <div class="canvas-stage" id="quarterTileStage" style="margin:0.4rem 0;">
+            <canvas id="quarterTileCanvas" height="200"></canvas>
+          </div>
+
+          <!-- Dynamic Visual Diagram of How the Repeating Tile is Constructed -->
+          <div style="margin-top:0.7rem;">
+            <strong style="font-size:0.76rem; color:var(--text-muted); text-transform:uppercase;">
+              Repeating Tile Layout (<span id="qDiagramGroupLabel">p2mm</span>):
+            </strong>
+            <div class="quarter-map" id="quarterMapDiagram"></div>
+          </div>
+        </div>
+
+        <!-- Right Column: Generated Frieze Output -->
+        <div>
+          <!-- Single Group Mode -->
+          <div id="quarterSinglePanel">
+            <label style="font-size:0.74rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block; margin-bottom:0.4rem;">
+              Select Frieze Symmetry Group to Generate:
+            </label>
+            <div class="group-selector" id="quarterGroupSelector">
+              <div class="group-option" data-group="p1">
+                <div class="g-code">p1</div>
+                <div class="g-name">Hop</div>
+                <div class="g-syms">1&times;1 Full Tile (No mirrors)</div>
+              </div>
+              <div class="group-option" data-group="p11g">
+                <div class="g-code">p11g</div>
+                <div class="g-name">Step</div>
+                <div class="g-syms">1&times;1 Glide reflection</div>
+              </div>
+              <div class="group-option" data-group="p1m1">
+                <div class="g-code">p1m1</div>
+                <div class="g-name">Sidle</div>
+                <div class="g-syms">1&times;1 Vertical mirrors</div>
+              </div>
+              <div class="group-option" data-group="p11m">
+                <div class="g-code">p11m</div>
+                <div class="g-name">Jump</div>
+                <div class="g-syms">1/2&times;1/2 Horizontal mirror</div>
+              </div>
+              <div class="group-option" data-group="p2">
+                <div class="g-code">p2</div>
+                <div class="g-name">Spinning Hop</div>
+                <div class="g-syms">1&times;1 180&deg; rotations</div>
+              </div>
+              <div class="group-option" data-group="p2mg">
+                <div class="g-code">p2mg</div>
+                <div class="g-name">Spinning Sidle</div>
+                <div class="g-syms">1/2&times;1/2 V-Mirror + Glide + Rot</div>
+              </div>
+              <div class="group-option selected" data-group="p2mm">
+                <div class="g-code">p2mm</div>
+                <div class="g-name">Spinning Jump</div>
+                <div class="g-syms">1/2&times;1/2 H + V Mirrors + Rot</div>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+              <label style="font-size:0.81rem; display:flex; align-items:center; gap:0.35rem; cursor:pointer;">
+                <input type="checkbox" id="qShowRectGridCheck" checked />
+                Highlight Repeating Tile &amp; Sub-Cell Grid
+              </label>
+              <div style="display:flex; gap:0.45rem; flex-wrap:wrap;">
+                <button class="btn success sm" id="qSavePatternBtn">&#128190; Save to My Patterns</button>
+                <button class="btn primary sm" id="qSendToAnalyzerBtn">&#128269; Test in Symmetry Analyser</button>
+                <button class="btn sm" id="qDownloadPngBtn">&#11015; Download PNG</button>
+              </div>
+            </div>
+
+            <div class="canvas-stage">
+              <canvas id="quarterOutputCanvas" height="250"></canvas>
+            </div>
+          </div>
+
+          <!-- All 7 Groups Comparison Gallery -->
+          <div id="quarterAll7Panel" style="display:none;">
+            <div class="gallery-grid" id="all7GalleryContainer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 2: PHOTO CALIBRATION & SYMMETRY ANALYZER (ACTIVITY 2) ==================== -->
+  <section id="tab-analyzer" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+          <h2>Activity 2: Upload a Frieze Photo &amp; Analyse Its Symmetries</h2>
+          <span id="snapStatusBadge" class="badge success" style="display:none;">&#129522; Snapped to Symmetry!</span>
+        </div>
+        <span id="analyzerPatternBadge" class="badge">Built-in: p11g (Step)</span>
+      </div>
+
+      <div class="control-row">
+        <div class="control-group">
+          <label for="friezePhotoUpload">Upload Frieze Photo (Guided 3-Step Setup)</label>
+          <input type="file" id="friezePhotoUpload" accept="image/*" />
+        </div>
+
+        <div class="control-group">
+          <label for="patternSourceSelect">Select Pattern from Collection</label>
+          <select id="patternSourceSelect">
+            <optgroup label="Built-in Frieze Groups">
+              <option value="p1">Group p1 — Hop (Translation only)</option>
+              <option value="p11g" selected>Group p11g — Step (Translation + Glide)</option>
+              <option value="p1m1">Group p1m1 — Sidle (Translation + Vertical Mirror)</option>
+              <option value="p11m">Group p11m — Jump (Translation + Horizontal Mirror)</option>
+              <option value="p2">Group p2 — Spinning Hop (Translation + 180° Rotation)</option>
+              <option value="p2mg">Group p2mg — Spinning Sidle (V-Mirror + Glide + 180° Rot)</option>
+              <option value="p2mm">Group p2mm — Spinning Jump (H-Mirror + V-Mirror + 180° Rot)</option>
+            </optgroup>
+            <optgroup label="Self-Test Challenge">
+              <option value="mystery">Mystery Pattern (Hide Label for Self-Test)</option>
+            </optgroup>
+            <optgroup label="My Saved Patterns (Local Storage)" id="savedPatternsOptgroup"></optgroup>
+          </select>
+        </div>
+
+        <div class="control-group" id="motifStyleGroup">
+          <label for="motifStyleSelect">Built-in Motif Style</label>
+          <select id="motifStyleSelect">
+            <option value="scroll">Botanical / Architectural Scroll</option>
+            <option value="footsteps">Conway Footsteps</option>
+            <option value="geometric">Geometric Flag &amp; Wedge</option>
+          </select>
+        </div>
+
+        <div class="control-group" style="margin-left:auto;">
+          <label>&nbsp;</label>
+          <div style="display:flex; gap:0.45rem; flex-wrap:wrap;">
+            <button class="btn" id="toggleSavedDrawerBtn">&#128194; My Patterns (<span id="savedPatternsCountLabel">0</span>)</button>
+            <button class="btn" id="newMysteryBtn">&#127922; Random Mystery</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAVED PATTERNS COLLECTION DRAWER (LOCAL STORAGE) -->
+      <div id="savedLibraryDrawer" class="saved-library-drawer">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <div>
+            <strong style="font-size:0.92rem; color:#0f172a;">My Saved Frieze Patterns (Stored in Browser Local Storage)</strong>
+            <p style="font-size:0.79rem; color:var(--text-muted);">Create patterns in Tab 1 or Tab 3, or calibrate an uploaded photo in Tab 2, and save them here to analyse anytime.</p>
+          </div>
+          <button class="btn sm" id="closeSavedDrawerBtn">&#10005; Close</button>
+        </div>
+        <div id="savedPatternsGrid" class="saved-grid"></div>
+      </div>
+
+      <!-- GUIDED 3-STEP PHOTO CALIBRATION WIZARD -->
+      <div id="photoCalibrationWizard" class="calibration-wizard">
+        <div class="wizard-steps">
+          <button class="w-step active" data-calstep="straighten">Step A: Straighten Photo</button>
+          <button class="w-step" data-calstep="midline">Step B: Find Middle Line</button>
+          <button class="w-step" data-calstep="period">Step C: Find Repeat Length L</button>
+          <button class="w-step" data-calstep="analyze">Step D: Analyse Symmetries</button>
+        </div>
+
+        <!-- Step A Controls -->
+        <div id="calStepStraighten" class="wizard-body">
+          <div class="wizard-instructions">
+            <h3>Step A: Straighten Your Frieze Photo (Optional)</h3>
+            <p>Adjust the tilt angle until the frieze band runs horizontally along the blue guide lines—or click <strong>"2-Point Level"</strong> and click two points along a horizontal edge of your frieze.</p>
+          </div>
+          <div class="wizard-controls">
+            <label style="font-size:0.81rem; font-weight:600;">
+              Angle: <span id="straightenAngleVal">0.0&deg;</span>
+              <input type="range" id="straightenAngleSlider" min="-20" max="20" step="0.1" value="0" style="width:125px; vertical-align:middle;" />
+            </label>
+            <button class="btn sm" id="straightenMinusBtn">-0.2&deg;</button>
+            <button class="btn sm" id="straightenPlusBtn">+0.2&deg;</button>
+            <button class="btn sm" id="twoPointLevelBtn">&#128208; 2-Point Level</button>
+            <button class="btn sm" id="straightenResetBtn">0&deg;</button>
+            <button class="btn primary" id="toMidlineStepBtn">Next: Find Middle Line &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Step B Controls -->
+        <div id="calStepMidline" class="wizard-body" style="display:none;">
+          <div class="wizard-instructions">
+            <h3>Step B: Identify the Horizontal Middle Line</h3>
+            <p>A transparent <strong>flipped upside-down copy</strong> appears on top. <strong>Drag it up or down</strong> on the canvas until its band sits directly on top of the original image to identify the middle line.</p>
+          </div>
+          <div class="wizard-controls">
+            <button class="btn sm" id="midlineUpBtn">&#9650; Nudge Up</button>
+            <button class="btn sm" id="midlineDownBtn">&#9660; Nudge Down</button>
+            <button class="btn sm" id="midlineCenterBtn">Centre</button>
+            <button class="btn primary" id="toPeriodStepBtn">Lock Middle Line &rarr; Next: Find L</button>
+          </div>
+        </div>
+
+        <!-- Step C Controls -->
+        <div id="calStepPeriod" class="wizard-body" style="display:none;">
+          <div class="wizard-instructions">
+            <h3>Step C: Determine the Repeat Length (<em>L</em>)</h3>
+            <p>An exact <strong>unflipped transparent copy</strong> appears on top. <strong>Drag it sideways</strong> (left or right) by one repeating unit until it matches the original pattern.</p>
+          </div>
+          <div class="wizard-controls">
+            <span class="badge">Period L = <strong id="calPeriodReadout">160</strong> px</span>
+            <button class="btn sm" id="periodLeftBtn">&#9664; -1px</button>
+            <button class="btn sm" id="periodRightBtn">+1px &#9654;</button>
+            <button class="btn sm" id="periodHalveBtn" title="Divide L by 2 if you aligned two repeat units">L &divide; 2</button>
+            <button class="btn success" id="toAnalyzeStepBtn">Lock L &amp; Extend to Both Sides &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Step D Banner -->
+        <div id="calStepAnalyze" class="wizard-body" style="display:none;">
+          <div class="wizard-instructions">
+            <h3>Photo Calibrated &amp; Extended to Both Sides!</h3>
+            <p>Midline locked at <strong>y = <span id="lockedMidlineVal">140</span>px</strong>, Period locked at <strong>L = <span id="lockedPeriodVal">160</span>px</strong>. Your pattern repeats seamlessly to both sides. Pick a tool, <strong>draw</strong> the symmetry you spotted (it will <strong>click into place</strong> when you are close), then <strong>test</strong> it.</p>
+          </div>
+          <div class="wizard-controls">
+            <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.3rem; cursor:pointer; background:#fff; padding:0.28rem 0.55rem; border-radius:6px; border:1px solid #bfdbfe;">
+              <input type="checkbox" id="photoExtendToggle" checked />
+              Extend Both Sides
+            </label>
+            <button class="btn success sm" id="saveCalibratedPhotoBtn">&#128190; Save Pattern</button>
+            <button class="btn sm" id="recalibrateBtn">&#9881; Re-calibrate</button>
+            <button class="btn sm" id="clearPhotoBtn">Use Built-in Pattern</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transformation Selector (Visible in Analysis Mode) -->
+      <div id="transformSelectorSection">
+        <label style="font-size:0.74rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+          Step 2: Pick a tool, then draw the symmetry you think you have found (it clicks into place if you are close)
+        </label>
+        <div class="transform-grid" id="transformGrid">
+          <div class="transform-card selected" data-transform="T">
+            <div class="t-title"><span>Translation (T)</span> <span>&rarr; +L</span></div>
+            <div class="t-desc">Draw a vector sideways; test whether sliding by it maps the pattern onto itself.</div>
+          </div>
+          <div class="transform-card" data-transform="H">
+            <div class="t-title"><span>Horizontal Mirror (H)</span> <span>&#8597;</span></div>
+            <div class="t-desc">Click to place a horizontal mirror line, then test the flip.</div>
+          </div>
+          <div class="transform-card" data-transform="V">
+            <div class="t-title"><span>Vertical Mirror (V)</span> <span>&#8596;</span></div>
+            <div class="t-desc">Click to place a vertical mirror line, then test the flip.</div>
+          </div>
+          <div class="transform-card" data-transform="R">
+            <div class="t-title"><span>180&deg; Rotation (R)</span> <span>&#8635;</span></div>
+            <div class="t-desc">Click to place a 180&deg; centre, then test the half-turn.</div>
+          </div>
+          <div class="transform-card" data-transform="G">
+            <div class="t-title"><span>Glide Reflection (G)</span> <span>&rarr; + &#8597;</span></div>
+            <div class="t-desc">Drag a glide vector along the axis, then test flip + slide.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Canvas Stage -->
+      <div class="canvas-stage draggable" id="analyzerStage">
+        <canvas id="analyzerCanvas" height="280"></canvas>
+      </div>
+
+      <!-- Animation Playback & Direct Drag Controls -->
+      <div id="analyzerPlaybackBar" class="control-row" style="justify-content: space-between; background: var(--surface-alt); padding: 0.62rem 0.85rem; border-radius: 10px; border: 1px solid var(--border);">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.45rem;">
+          <button class="btn primary" id="playAnimBtn">&#9654; Test it</button>
+          <button class="btn" id="snapEndBtn">&#9197; Apply (100%)</button>
+          <button class="btn" id="resetAnimBtn">&#8634; Reset</button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:170px; max-width:260px;">
+          <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted);">Scrub:</span>
+          <input type="range" id="animScrubber" min="0" max="100" value="0" style="flex:1;" />
+          <span id="animPctLabel" style="font-size:0.79rem; font-weight:700; width:35px;">0%</span>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.65rem;">
+          <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.3rem; cursor:pointer;" title="Symmetry lines click into place like a magnet when close to a true symmetry">
+            <input type="checkbox" id="magneticSnapCheck" checked />
+            &#129522; Magnetic Snap
+          </label>
+          <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.3rem; cursor:pointer;">
+            <input type="checkbox" id="tintOverlayCheck" checked />
+            Colour-tint copy
+          </label>
+          <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.3rem;">
+            Opacity:
+            <input type="range" id="overlayOpacitySlider" min="20" max="95" value="60" style="width:65px;" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Mark Discovered Symmetries Bar (Spacebar / Button) -->
+      <div id="markSymmetryToolbar" class="mark-toolbar">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.55rem;">
+          <button class="btn purple" id="markSymmetryBtn">&#128204; Pin Verified Symmetry (<kbd>Space</kbd>)</button>
+          <span style="font-size:0.8rem; color:#4c1d95;">
+            Draw it, press <strong>Test it</strong> and watch the copy move. If it lands exactly on the pattern, press <kbd>Space</kbd> to pin your <strong>mirror line</strong>, <strong>rotation centre</strong> or <strong>glide vector</strong>.
+          </span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem;">
+          <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.28rem; cursor:pointer; color:#3b0764;">
+            <input type="checkbox" id="showMarkedCheck" checked />
+            Show Marks (<span id="markedCountBadge">0</span>)
+          </label>
+          <button class="btn sm" id="undoMarkBtn">&#8630; Undo</button>
+          <button class="btn sm" id="clearMarksBtn">Clear</button>
+          <button class="btn sm" id="exportAnnotatedBtn" title="Download PNG with all marked symmetry lines, rotation centres, and glide vectors">&#11015; Save Diagram</button>
+        </div>
+      </div>
+
+      <!-- Axis & Drag Position Helper -->
+      <div id="analyzerAxisHint" class="canvas-hint" style="margin-top:0.6rem;">
+        <div>
+          <strong id="liveReadoutLabel">Overlay Position:</strong>
+          <span id="liveReadoutText">Drag the transparent copy left or right (or use &larr; / &rarr; arrow keys); lines snap near true symmetries.</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
+          <button class="btn sm" id="nudgeCopyLeftBtn" title="Nudge copy left (Left Arrow)">&#9664; -2px</button>
+          <button class="btn sm" id="nudgeCopyRightBtn" title="Nudge copy right (Right Arrow)">+2px &#9654;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Analysis & Classifier Grid -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <h2>Step 3: Record Your Symmetry Findings</h2>
+          <button class="btn sm" id="resetChecklistBtn">Clear Findings</button>
+        </div>
+        <p style="font-size:0.83rem; color:var(--text-muted); margin-bottom:0.7rem;">
+          Marking a matching symmetry with <kbd>Space</kbd> automatically checks <strong>Yes</strong> below, or you can toggle each transformation manually.
+        </p>
+        <table class="check-table">
+          <thead>
+            <tr>
+              <th>Transformation</th>
+              <th>What to Look For</th>
+              <th>Symmetry?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Horizontal Mirror (H)</strong></td>
+              <td>Flipping upside down across midline matches.</td>
+              <td>
+                <div class="yn-group" data-sym="H">
+                  <button class="yn-btn yes" data-val="true">Yes</button>
+                  <button class="yn-btn no" data-val="false">No</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Vertical Mirror (V)</strong></td>
+              <td>Dragging flipped copy left/right clicks onto a vertical mirror line.</td>
+              <td>
+                <div class="yn-group" data-sym="V">
+                  <button class="yn-btn yes" data-val="true">Yes</button>
+                  <button class="yn-btn no" data-val="false">No</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>180&deg; Rotation (R)</strong></td>
+              <td>Dragging rotated copy left/right clicks onto a rotation centre.</td>
+              <td>
+                <div class="yn-group" data-sym="R">
+                  <button class="yn-btn yes" data-val="true">Yes</button>
+                  <button class="yn-btn no" data-val="false">No</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Glide Reflection (G)</strong></td>
+              <td>Flipping across the midline + sliding matches, <strong>and</strong> neither the flip nor the slide works alone (a <em>true</em> glide, v = <em>L/2</em>). If the midline is a mirror, sliding by <em>kL</em> also works, but that is only mirror + translation.</td>
+              <td>
+                <div class="yn-group" data-sym="G">
+                  <button class="yn-btn yes" data-val="true">Yes</button>
+                  <button class="yn-btn no" data-val="false">No</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Live Frieze Group Classifier</h2>
+          <span class="badge">Mathematical Deduction</span>
+        </div>
+        <p style="font-size:0.83rem; color:var(--text-muted);">
+          Every 1D repeating frieze pattern belongs to exactly one of the <strong>7 Frieze groups</strong>:
+        </p>
+        <div id="classifierResult" class="deduction-box">
+          Mark <strong>Yes</strong> or <strong>No</strong> in the table on the left (or press <kbd>Space</kbd> when a symmetry aligns) to classify the pattern.
+        </div>
+        <div style="margin-top:0.85rem; font-size:0.8rem; color:var(--text-muted);">
+          <strong>Marked Symmetries Legend:</strong>
+          <ul style="padding-left:1.2rem; margin-top:0.25rem;">
+            <li><strong>Solid Green Line (V / H):</strong> Axis of reflection symmetry.</li>
+            <li><strong>Purple Diamond + Arc (R):</strong> Centre of 180&deg; rotational symmetry.</li>
+            <li><strong>Dashed Amber Midline + Vector Arrow (G):</strong> Glide reflection axis and shift vector <strong>v</strong>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 3: FREEHAND FRIEZE SKETCHPAD ==================== -->
+  <section id="tab-creator" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Continuous Frieze Sketchpad (Draw Anywhere Across the Strip)</h2>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button class="btn success" id="saveSketchpadPatternBtn">&#128190; Save to My Patterns</button>
+          <button class="btn primary" id="sendToAnalyzerBtn">&#128269; Test in Symmetry Analyser</button>
+          <button class="btn" id="downloadPngBtn">&#11015; Download PNG</button>
+        </div>
+      </div>
+
+      <label style="font-size:0.74rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block; margin-bottom:0.4rem;">
+        Choose Symmetry Group (Switch anytime to watch your strokes re-symmetrize!)
+      </label>
+      <div class="group-selector" id="creatorGroupSelector">
+        <div class="group-option selected" data-group="p1">
+          <div class="g-code">p1</div>
+          <div class="g-name">Hop</div>
+          <div class="g-syms">Translation only</div>
+        </div>
+        <div class="group-option" data-group="p11g">
+          <div class="g-code">p11g</div>
+          <div class="g-name">Step</div>
+          <div class="g-syms">Translation + Glide</div>
+        </div>
+        <div class="group-option" data-group="p1m1">
+          <div class="g-code">p1m1</div>
+          <div class="g-name">Sidle</div>
+          <div class="g-syms">Translation + V-Mirror</div>
+        </div>
+        <div class="group-option" data-group="p11m">
+          <div class="g-code">p11m</div>
+          <div class="g-name">Jump</div>
+          <div class="g-syms">Translation + H-Mirror</div>
+        </div>
+        <div class="group-option" data-group="p2">
+          <div class="g-code">p2</div>
+          <div class="g-name">Spinning Hop</div>
+          <div class="g-syms">Translation + 180&deg; Rot</div>
+        </div>
+        <div class="group-option" data-group="p2mg">
+          <div class="g-code">p2mg</div>
+          <div class="g-name">Spinning Sidle</div>
+          <div class="g-syms">V-Mirror + Glide + 180&deg; Rot</div>
+        </div>
+        <div class="group-option" data-group="p2mm">
+          <div class="g-code">p2mm</div>
+          <div class="g-name">Spinning Jump</div>
+          <div class="g-syms">H-Mirror + V-Mirror + 180&deg; Rot</div>
+        </div>
+      </div>
+
+      <div class="control-row" style="background: var(--surface-alt); padding: 0.6rem 0.85rem; border-radius: 10px; border: 1px solid var(--border); justify-content: space-between;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem;">
+          <button class="btn sm active-pill tool-btn" data-tool="brush">&#9999;&#65039; Brush</button>
+          <button class="btn sm tool-btn" data-tool="line">&#128207; Line</button>
+          <button class="btn sm tool-btn" data-tool="circle">&#9898; Dot / Circle</button>
+          <button class="btn sm tool-btn" data-tool="triangle">&#128208; Wedge</button>
+        </div>
+
+        <div class="swatch-row" id="colorSwatches">
+          <button class="swatch active" data-color="#1e3a8a" style="background:#1e3a8a;"></button>
+          <button class="swatch" data-color="#be123c" style="background:#be123c;"></button>
+          <button class="swatch" data-color="#047857" style="background:#047857;"></button>
+          <button class="swatch" data-color="#b45309" style="background:#b45309;"></button>
+          <button class="swatch" data-color="#0f172a" style="background:#0f172a;"></button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.45rem;">
+          <label style="font-size:0.79rem; font-weight:600; color:var(--text-muted);">Size:</label>
+          <input type="range" id="brushSizeSlider" min="2" max="16" value="5" style="width:72px;" />
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.45rem;">
+          <label style="font-size:0.81rem; display:flex; align-items:center; gap:0.3rem; cursor:pointer; margin-right:0.3rem;">
+            <input type="checkbox" id="showGuidesCheck" checked />
+            Symmetry Guides
+          </label>
+          <button class="btn sm" id="undoStrokeBtn">&#8630; Undo</button>
+          <button class="btn sm" id="clearCanvasBtn">&#128465; Clear</button>
+        </div>
+      </div>
+
+      <div class="canvas-stage">
+        <canvas id="creatorCanvas" height="250"></canvas>
+      </div>
+
+      <div class="canvas-hint">
+        <div>
+          <strong>Guide Legend:</strong>
+          <span style="color:#059669; font-weight:600;">&#9632; Shaded Region</span> = Fundamental Domain &nbsp;|&nbsp;
+          <span style="color:#2563eb; font-weight:600;">--- Dashed Line</span> = Mirror Line &nbsp;|&nbsp;
+          <span style="color:#d97706; font-weight:600;">&#8943; Dotted Line</span> = Glide Axis &nbsp;|&nbsp;
+          <span style="color:#e11d48; font-weight:600;">&#9670; Diamond</span> = 180&deg; Rotation Centre
+        </div>
+        <div id="creatorGroupInfo" style="font-weight:600; color:#0f172a;">Active: p1 (Hop)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 4: GUIDED LAB & REFERENCE ==================== -->
+  <section id="tab-lab" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <h2>Guided Activity: Mystery Pattern Detective</h2>
+        <span class="badge" id="challengeScoreBadge">Score: 0 / 0</span>
+      </div>
+
+      <div class="mission-banner">
+        <div>
+          <strong style="color:#1e3a8a; font-size:0.95rem;">Challenge Objective:</strong>
+          <p style="font-size:0.85rem; color:#334155; margin-top:0.2rem;">
+            Load an unlabelled Mystery Pattern in the Analyser, drag the overlays until the symmetry lines click into place (marking them with <kbd>Space</kbd>), and classify its Frieze group here!
+          </p>
+        </div>
+        <button class="btn primary" id="launchChallengeBtn">&#127919; Load Mystery Pattern in Analyser</button>
+      </div>
+
+      <div class="control-row">
+        <div class="control-group" style="min-width:260px;">
+          <label for="challengeGuessSelect">Your Classification for Current Mystery Pattern</label>
+          <select id="challengeGuessSelect">
+            <option value="">-- Select a Frieze Group --</option>
+            <option value="p1">p1 (Hop — Translation only)</option>
+            <option value="p11g">p11g (Step — Translation + Glide)</option>
+            <option value="p1m1">p1m1 (Sidle — Translation + Vertical Mirror)</option>
+            <option value="p11m">p11m (Jump — Translation + Horizontal Mirror)</option>
+            <option value="p2">p2 (Spinning Hop — Translation + 180° Rotation)</option>
+            <option value="p2mg">p2mg (Spinning Sidle — V-Mirror + Glide + 180° Rot)</option>
+            <option value="p2mm">p2mm (Spinning Jump — H-Mirror + V-Mirror + 180° Rot)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>&nbsp;</label>
+          <button class="btn success" id="submitGuessBtn">&#10003; Check Answer</button>
+        </div>
+      </div>
+
+      <div id="challengeFeedback" class="deduction-box" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Reference Guide: The 7 Frieze Symmetry Groups</h2>
+        <span class="badge">Complete Classification</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>IUC Symbol</th>
+              <th>Conway Name</th>
+              <th>Orbifold</th>
+              <th>H-Mirror</th>
+              <th>V-Mirror</th>
+              <th>180&deg; Rot</th>
+              <th>Glide (L/2)</th>
+              <th>Adaptive Tile Layout &amp; Image Scaling</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>p1</strong></td>
+              <td>Hop</td>
+              <td><code>&infin;&infin;</code></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><code>[I]</code> &mdash; 1&times;1 Full Tile (100% scale)</td>
+            </tr>
+            <tr>
+              <td><strong>p11g</strong></td>
+              <td>Step</td>
+              <td><code>&infin;&times;</code></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><code>[I | H-flip]</code> &mdash; 1&times;2 Side-by-Side (100% scale)</td>
+            </tr>
+            <tr>
+              <td><strong>p1m1</strong></td>
+              <td>Sidle</td>
+              <td><code>*&infin;&infin;</code></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><code>[I | V-flip]</code> &mdash; 1&times;2 Side-by-Side (100% scale)</td>
+            </tr>
+            <tr>
+              <td><strong>p11m</strong></td>
+              <td>Jump</td>
+              <td><code>&infin;*</code></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><code>[I] / [H-flip]</code> &mdash; 2&times;1 Stacked (1/2&times;1/2 scale)</td>
+            </tr>
+            <tr>
+              <td><strong>p2</strong></td>
+              <td>Spinning Hop</td>
+              <td><code>22&infin;</code></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><code>[I | 180&deg; Rot]</code> &mdash; 1&times;2 Side-by-Side (100% scale)</td>
+            </tr>
+            <tr>
+              <td><strong>p2mg</strong></td>
+              <td>Spinning Sidle</td>
+              <td><code>2*&infin;</code></td>
+              <td><span class="sym-pill sym-no">No</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><code>[I | V] / [R | H]</code> &mdash; 2&times;2 Quad (1/2&times;1/2 scale)</td>
+            </tr>
+            <tr>
+              <td><strong>p2mm</strong></td>
+              <td>Spinning Jump</td>
+              <td><code>*22&infin;</code></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-yes">Yes</span></td>
+              <td><span class="sym-pill sym-no">No*</span></td>
+              <td><code>[I | V] / [H | R]</code> &mdash; 2&times;2 Quad (1/2&times;1/2 scale)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- INLINE MODAL FOR NAMING & SAVING A PATTERN TO LOCAL STORAGE -->
+<div id="savePatternModalBackdrop" class="save-modal-backdrop" role="dialog" aria-modal="true">
+  <div class="save-modal">
+    <h3>Save Pattern to My Collection</h3>
+    <p id="saveModalDesc">This pattern will be stored in your browser's local storage and added to the pattern dropdown in the Symmetry Analyser.</p>
+    <div class="control-group" style="margin-bottom:0.95rem;">
+      <label for="savePatternNameInput">Pattern Name</label>
+      <input type="text" id="savePatternNameInput" placeholder="e.g., Letter F Jump Frieze" maxlength="48" />
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+      <button class="btn" id="cancelSaveModalBtn">Cancel</button>
+      <button class="btn success" id="confirmSaveModalBtn">&#128190; Save Pattern</button>
+    </div>
+  </div>
+</div>
+
+<!-- NON-BLOCKING TOAST NOTIFICATION -->
+<div id="toastBanner" class="toast-banner">
+  <span id="toastMessage">Pattern saved!</span>
+  <button class="btn sm" id="toastActionBtn" style="display:none; padding:0.2rem 0.5rem;">Undo</button>
+</div>
+
+<script>
+(() => {
+  /* ==========================================================================
+     1. MATHEMATICAL DEFINITIONS OF THE 7 FRIEZE GROUPS & ADAPTIVE TILE LAYOUTS
+     ========================================================================== */
+  // Adaptive tile layouts for Tab 1:
+  // rows: 1 (full height H, 100% scale) or 2 (half height H/2, shrunk 1/2 x 1/2 in both directions)
+  // cols: 1 (single column) or 2 (left + right columns)
+  // cells: array of { r, c, op } where op in {'I', 'H', 'V', 'R'}
+  const FRIEZE_GROUPS = {
+    p1: {
+      code: 'p1',
+      name: 'Hop',
+      desc: 'Translation only',
+      symmetries: { H: false, V: false, R: false, G: false },
+      tileLayout: {
+        rows: 1,
+        cols: 1,
+        scaleLabel: '100% (1\u00d71 Full Tile)',
+        cells: [
+          { r: 0, c: 0, op: 'I', label: 'Repeating Tile: Original (I)' }
+        ]
+      },
+      orbit: (u, v) => [
+        { u: wrap01(u), v: v, flipX: false, flipY: false }
+      ]
+    },
+    p11g: {
+      code: 'p11g',
+      name: 'Step',
+      desc: 'Translation + Glide reflection',
+      symmetries: { H: false, V: false, R: false, G: true },
+      tileLayout: {
+        rows: 1,
+        cols: 2,
+        scaleLabel: '100% (1\u00d71 Height, 2 Steps)',
+        cells: [
+          { r: 0, c: 0, op: 'I', label: 'Left Half: Original (I)' },
+          { r: 0, c: 1, op: 'H', label: 'Right Half: Upside-Down Flip (H)' }
+        ]
+      },
+      orbit: (u, v) => [
+        { u: wrap01(u), v: v, flipX: false, flipY: false },
+        { u: wrap01(u + 0.5), v: -v, flipX: false, flipY: true }
+      ]
+    },
+    p1m1: {
+      code: 'p1m1',
+      name: 'Sidle',
+      desc: 'Translation + Vertical reflection',
+      symmetries: { H: false, V: true, R: false, G: false },
+      tileLayout: {
+        rows: 1,
+        cols: 2,
+        scaleLabel: '100% (1\u00d71 Height, V-Mirror)',
+        cells: [
+          { r: 0, c: 0, op: 'I', label: 'Left Half: Original (I)' },
+          { r: 0, c: 1, op: 'V', label: 'Right Half: Left-Right Flip (V)' }
+        ]
+      },
+      orbit: (u, v) => [
+        { u: wrap01(u), v: v, flipX: false, flipY: false },
+        { u: wrap01(1 - u), v: v, flipX: true, flipY: false }
+      ]
+    },
+    p11m: {
+      code: 'p11m',
+      name: 'Jump',
+      desc: 'Translation + Horizontal reflection',
+      symmetries: { H: true, V: false, R: false, G: false },
+      tileLayout: {
+        rows: 2,
+        cols: 1,
+        scaleLabel: '50% (1/2\u00d71/2 Shrunk)',
+        cells: [
+          { r: 0, c: 0, op: 'I', label: 'Top Half (1/2\u00d71/2): Original (I)' },
+          { r: 1, c: 0, op: 'H', label: 'Bottom Half (1/2\u00d71/2): Upside-Down Flip (H)' }
+        ]
+      },
+      orbit: (u, v) => [
+        { u: wrap01(u), v: v, flipX: false, flipY: false },
+        { u: wrap01(u), v: -v, flipX: false, flipY: true }
+      ]
+    },
+    p2: {
+      code: 'p2',
+      name: 'Spinning Hop',
+      desc: 'Translation + 180\u00b0 rotation',
+      symmetries: { H: false, V: false, R: true, G: false },
+      tileLayout: {
+        rows: 1,
+        cols: 2,
+        scaleLabel: '100% (1\u00d71 Height, 180\u00b0 Rot)',
+        cells: [
+          { r: 0, c: 0, op: 'I', label: 'Left Half: Original (I)' },
+          { r: 0, c: 1, op: 'R', label: 'Right Half: 180\u00b0 Rotated (R)' }
+        ]
+      },
+      orbit: (u, v) => [
+        { u: wrap01(u), v: v, flipX: false, flipY: false },
+        { u: wrap01(1 - u), v: -v, flipX: true, flipY: true }
+      ]
+    },
+    p2mg: {
+      code: 'p2mg',
+      name: 'Spinning Sidle',
+      desc: 'Vertical reflection + Glide + 180\u00b0 rotation',
+      symmetries: { H: false, V: true, R: true, G: true },
+      tileLayout: {
+        rows: 2,
+        cols: 2,
+        scaleLabel: '50% (1/2\u00d71/2 Shrunk)',
+        cells: [
+          { r: 0, c: 0, op: 'I', label: 'Top-Left: Original (I)' },
+          { r: 0, c: 1, op: 'V', label: 'Top-Right: Left-Right Flip (V)' },
+          { r: 1, c: 0, op: 'R', label: 'Bottom-Left: 180\u00b0 Rotated (R)' },
+          { r: 1, c: 1, op: 'H', label: 'Bottom-Right: Upside-Down Flip (H)' }
+        ]
+      },
+      orbit: (u, v) => [
+        { u: wrap01(u), v: v, flipX: false, flipY: false },
+        { u: wrap01(1 - u), v: v, flipX: true, flipY: false },
+        { u: wrap01(u + 0.5), v: -v, flipX: false, flipY: true },
+        { u: wrap01(1.5 - u), v: -v, flipX: true, flipY: true }
+      ]
+    },
+    p2mm: {
+      code: 'p2mm',
+      name: 'Spinning Jump',
+      desc: 'Horizontal + Vertical reflections + 180\u00b0 rotation',
+      symmetries: { H: true, V: true, R: true, G: false },
+      tileLayout: {
+        rows: 2,
+        cols: 2,
+        scaleLabel: '50% (1/2\u00d71/2 Shrunk)',
+        cells: [
+          { r: 0, c: 0, op: 'I', label: 'Top-Left: Original (I)' },
+          { r: 0, c: 1, op: 'V', label: 'Top-Right: Left-Right Flip (V)' },
+          { r: 1, c: 0, op: 'H', label: 'Bottom-Left: Upside-Down Flip (H)' },
+          { r: 1, c: 1, op: 'R', label: 'Bottom-Right: 180\u00b0 Rotated (R)' }
+        ]
+      },
+      orbit: (u, v) => [
+        { u: wrap01(u), v: v, flipX: false, flipY: false },
+        { u: wrap01(u), v: -v, flipX: false, flipY: true },
+        { u: wrap01(1 - u), v: v, flipX: true, flipY: false },
+        { u: wrap01(1 - u), v: -v, flipX: true, flipY: true }
+      ]
+    }
+  };
+
+  function wrap01(val) {
+    return ((val % 1) + 1) % 1;
+  }
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  /* ==========================================================================
+     2. LOCAL STORAGE COLLECTION MANAGEMENT
+     ========================================================================== */
+  const STORAGE_KEY = 'frieze_lab_saved_patterns_v1';
+
+  function loadSavedPatternsFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveSavedPatternsToStorage(list) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      return true;
+    } catch (e) {
+      showToast('Storage quota reached — try deleting an older saved pattern first.');
+      return false;
+    }
+  }
+
+  /* ==========================================================================
+     3. APPLICATION STATE
+     ========================================================================== */
+  const state = {
+    activeTab: 'quarter',
+    savedPatterns: loadSavedPatternsFromStorage(),
+    activeSavedPattern: null, // { id, name, group, period, yMidRatio, tileImg, previewDataUrl }
+    pendingSaveFactory: null,
+    lastDeletedPattern: null,
+
+    analyzer: {
+      sourceMode: 'builtin', // 'builtin' | 'photo' | 'quarter' | 'custom' | 'saved'
+      builtinGroup: 'p11g',
+      isMystery: false,
+      mysteryGroup: 'p2mg',
+      motifStyle: 'scroll',
+
+      // Uploaded photo & 3-step guided calibration state
+      rawPhotoImg: null,
+      calStep: 'analyze', // 'straighten' | 'midline' | 'period' | 'analyze'
+      straightenDeg: 0,
+      twoPointMode: false,
+      levelPoints: [],
+      yMid: 140,
+      period: 170,
+      calPeriodDragX: 160,
+      extendBothSides: true,
+      photoTileLeft: 0,
+      photoTileWidth: 170,
+
+      // Downsampled grayscale buffer for fast photo symmetry correlation
+      photoGrayGrid: null,
+
+      // Transformation & Magnetic Snapping
+      baseAxisFrac: 0,
+      drawn: false,        // user has drawn a line / centre / vector
+      showOverlay: false,  // test animation visible
+      drawnY: null,
+      vecX0: 0,
+      manualOffsetX: 0,
+      transform: 'T',     // 'T' | 'H' | 'V' | 'R' | 'G'
+      progress: 0,
+      isPlaying: false,
+      animRaf: null,
+      lastTimestamp: 0,
+      tintOverlay: true,
+      overlayOpacity: 0.60,
+      magneticSnap: true,
+      isSnapped: false,
+      snapMessage: '',
+
+      // Pointer drag state on analyzerCanvas
+      dragTarget: null,   // 'midline' | 'period' | 'overlay' | 'axisHandle'
+      dragStartX: 0,
+      dragStartY: 0,
+      dragInitialVal: 0,
+
+      // Marked symmetries
+      markedSymmetries: [],
+      showMarked: true,
+
+      checklist: { H: null, V: null, R: null, G: null }
+    },
+    quarter: {
+      group: 'p2mm',
+      viewMode: 'single', // 'single' | 'all7'
+      showRectGrid: true,
+      sourceType: 'draw', // 'draw' | 'photo'
+      photoImg: null,
+      photoRot90: 0,
+      photoFlipX: false,
+      photoZoom: 1.0,
+      tool: 'brush',
+      fillShapes: false,
+      size: 6,
+      color: '#1e3a8a',
+      strokes: [],
+      currentStroke: null,
+      isDrawing: false
+    },
+    creator: {
+      group: 'p1',
+      tool: 'brush',
+      color: '#1e3a8a',
+      brushSize: 5,
+      showGuides: true,
+      period: 180,
+      strokes: [],
+      currentStroke: null,
+      isDrawing: false
+    },
+    lab: {
+      score: 0,
+      attempts: 0,
+      solvedCurrent: false
+    }
+  };
+
+  /* ==========================================================================
+     4. SUBTLE MAGNETIC SNAP AUDIO FEEDBACK (WEB AUDIO API)
+     ========================================================================== */
+  let audioCtx = null;
+  function playMagneticClickSound() {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(520, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.045);
+
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.055);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.06);
+    } catch (e) {
+      // Ignore audio restrictions silently
+    }
+  }
+
+  /* ==========================================================================
+     5. CANVAS REFERENCES & HIGH-DPI SIZING
+     ========================================================================== */
+  const analyzerCanvas = document.getElementById('analyzerCanvas');
+  const analyzerCtx = analyzerCanvas.getContext('2d');
+
+  const quarterTileCanvas = document.getElementById('quarterTileCanvas');
+  const quarterTileCtx = quarterTileCanvas.getContext('2d');
+  const quarterOutputCanvas = document.getElementById('quarterOutputCanvas');
+  const quarterOutputCtx = quarterOutputCanvas.getContext('2d');
+
+  const creatorCanvas = document.getElementById('creatorCanvas');
+  const creatorCtx = creatorCanvas.getContext('2d');
+
+  const straightenedPhotoCanvas = document.createElement('canvas');
+  const straightenedPhotoCtx = straightenedPhotoCanvas.getContext('2d');
+  const baseBuffer = document.createElement('canvas');
+  const baseBufCtx = baseBuffer.getContext('2d');
+  const overlayBuffer = document.createElement('canvas');
+  const overlayBufCtx = overlayBuffer.getContext('2d');
+
+  const ANALYZER_H = 280; // fixed CSS height of the analyzer canvas (was re-read from a DOM attribute and doubled on hi-DPI screens)
+
+  function setCanvasDpiSize(canvas, cssW, cssH) {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+  }
+
+  function resizeAllCanvases() {
+    const aRect = analyzerCanvas.parentElement.getBoundingClientRect();
+    const aW = Math.max(320, Math.floor(aRect.width));
+    const aH = ANALYZER_H;
+    const prevH = parseFloat(analyzerCanvas.style.height) || aH;
+    if (aRect.width > 0) {
+      setCanvasDpiSize(analyzerCanvas, aW, aH);
+      if (state.analyzer.sourceMode === 'saved' && state.activeSavedPattern) {
+        state.analyzer.yMid = (state.activeSavedPattern.yMidRatio || 0.5) * aH;
+      } else if (state.analyzer.sourceMode !== 'photo') {
+        state.analyzer.yMid = aH / 2;
+      } else if (prevH > 0) {
+        state.analyzer.yMid = (state.analyzer.yMid / prevH) * aH;
+      }
+    }
+
+    const qtRect = quarterTileCanvas.parentElement.getBoundingClientRect();
+    if (qtRect.width > 0) {
+      setCanvasDpiSize(quarterTileCanvas, Math.max(220, Math.floor(qtRect.width)), 200);
+    }
+
+    const qoRect = quarterOutputCanvas.parentElement.getBoundingClientRect();
+    if (qoRect.width > 0) {
+      setCanvasDpiSize(quarterOutputCanvas, Math.max(300, Math.floor(qoRect.width)), 250);
+    }
+
+    const cRect = creatorCanvas.parentElement.getBoundingClientRect();
+    if (cRect.width > 0) {
+      setCanvasDpiSize(creatorCanvas, Math.max(300, Math.floor(cRect.width)), 250);
+    }
+
+    if (state.analyzer.rawPhotoImg) {
+      rebuildStraightenedPhoto();
+    }
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+    renderCreator();
+  }
+
+  window.addEventListener('resize', resizeAllCanvases);
+
+  /* ==========================================================================
+     6. PROCEDURAL & STROKE FRIEZE RENDERING HELPERS
+     ========================================================================== */
+  function drawAsymmetricMotif(ctx, style, color) {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (style === 'footsteps') {
+      ctx.beginPath();
+      ctx.ellipse(0.24, 0.28, 0.055, 0.085, -0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(0.18, 0.40);
+      ctx.bezierCurveTo(0.14, 0.56, 0.16, 0.68, 0.23, 0.69);
+      ctx.bezierCurveTo(0.31, 0.70, 0.34, 0.58, 0.31, 0.48);
+      ctx.bezierCurveTo(0.28, 0.42, 0.28, 0.38, 0.18, 0.40);
+      ctx.fill();
+
+      const toes = [
+        { x: 0.31, y: 0.76, rx: 0.026, ry: 0.036 },
+        { x: 0.265, y: 0.775, rx: 0.017, ry: 0.026 },
+        { x: 0.228, y: 0.76, rx: 0.015, ry: 0.023 },
+        { x: 0.195, y: 0.735, rx: 0.014, ry: 0.020 },
+        { x: 0.168, y: 0.70, rx: 0.012, ry: 0.017 }
+      ];
+      toes.forEach((t) => {
+        ctx.beginPath();
+        ctx.ellipse(t.x, t.y, t.rx, t.ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    } else if (style === 'geometric') {
+      ctx.beginPath();
+      ctx.moveTo(0.12, 0.16);
+      ctx.lineTo(0.12, 0.84);
+      ctx.lineTo(0.39, 0.64);
+      ctx.lineTo(0.18, 0.52);
+      ctx.lineTo(0.18, 0.16);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(0.31, 0.28, 0.055, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(0.10, 0.18);
+      ctx.bezierCurveTo(0.10, 0.58, 0.22, 0.84, 0.41, 0.80);
+      ctx.bezierCurveTo(0.34, 0.62, 0.25, 0.52, 0.24, 0.36);
+      ctx.bezierCurveTo(0.32, 0.42, 0.38, 0.36, 0.36, 0.24);
+      ctx.bezierCurveTo(0.33, 0.15, 0.19, 0.14, 0.10, 0.18);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(0.14, 0.74, 0.036, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function renderFriezeStrip(ctx, xStart, xEnd, height, period, groupCode, motifStyle, color, customStrokes) {
+    const yMid = height / 2;
+    const halfH = height * 0.42;
+    const groupObj = FRIEZE_GROUPS[groupCode];
+
+    const kMin = Math.floor(xStart / period) - 1;
+    const kMax = Math.ceil(xEnd / period) + 1;
+
+    if (customStrokes && customStrokes.length > 0) {
+      renderStrokesWithSymmetry(ctx, kMin, kMax, yMid, halfH, period, groupObj, customStrokes, color);
+      return;
+    }
+
+    const sampleTransforms = groupObj.orbit(0.2, 0.5);
+    for (let k = kMin; k <= kMax; k++) {
+      const cellX = k * period;
+      sampleTransforms.forEach((tr) => {
+        ctx.save();
+        const originX = cellX + (tr.flipX ? period : 0);
+        const scaleX = (tr.flipX ? -1 : 1) * period;
+        const scaleY = (tr.flipY ? 1 : -1) * halfH;
+
+        const baseU = groupObj.orbit(0, 0.5).find(
+          (o) => o.flipX === tr.flipX && o.flipY === tr.flipY
+        ).u;
+        const shiftPx = baseU * period;
+
+        ctx.translate(originX + shiftPx, yMid);
+        ctx.scale(scaleX, scaleY);
+        drawAsymmetricMotif(ctx, motifStyle, color);
+        ctx.restore();
+      });
+    }
+  }
+
+  function renderStrokesWithSymmetry(ctx, kMin, kMax, yMid, halfH, period, groupObj, strokes, overrideColor) {
+    strokes.forEach((stroke) => {
+      if (!stroke.points || stroke.points.length === 0) return;
+      const strokeColor = overrideColor || stroke.color;
+      ctx.save();
+      ctx.strokeStyle = strokeColor;
+      ctx.fillStyle = strokeColor;
+      ctx.lineWidth = stroke.size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const branchCount = groupObj.orbit(0.1, 0.2).length;
+
+      for (let b = 0; b < branchCount; b++) {
+        const transformedPts = [];
+        let prevU = null;
+        let uOffset = 0;
+
+        for (let i = 0; i < stroke.points.length; i++) {
+          const pt = stroke.points[i];
+          const orb = groupObj.orbit(pt.u, pt.v)[b];
+          let curU = orb.u;
+          if (prevU !== null) {
+            const diff = curU - prevU;
+            if (diff > 0.5) uOffset -= 1;
+            else if (diff < -0.5) uOffset += 1;
+          }
+          prevU = curU;
+          transformedPts.push({ u: curU + uOffset, v: orb.v });
+        }
+
+        for (let k = kMin; k <= kMax; k++) {
+          if (stroke.tool === 'circle' && transformedPts.length >= 2) {
+            const p0 = transformedPts[0];
+            const p1 = transformedPts[transformedPts.length - 1];
+            const cx = (k + p0.u) * period;
+            const cy = yMid - p0.v * halfH;
+            const r = Math.max(3, Math.hypot((p1.u - p0.u) * period, (p1.v - p0.v) * halfH));
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (stroke.tool === 'triangle' && transformedPts.length >= 2) {
+            const p0 = transformedPts[0];
+            const p1 = transformedPts[transformedPts.length - 1];
+            const x0 = (k + p0.u) * period;
+            const y0 = yMid - p0.v * halfH;
+            const x1 = (k + p1.u) * period;
+            const y1 = yMid - p1.v * halfH;
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+            ctx.lineTo(x0, y1);
+            ctx.closePath();
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            transformedPts.forEach((tp, idx) => {
+              const px = (k + tp.u) * period;
+              const py = yMid - tp.v * halfH;
+              if (idx === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            });
+            if (transformedPts.length === 1) {
+              const px = (k + transformedPts[0].u) * period;
+              const py = yMid - transformedPts[0].v * halfH;
+              ctx.arc(px, py, stroke.size / 2, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              ctx.stroke();
+            }
+          }
+        }
+      }
+      ctx.restore();
+    });
+  }
+
+  /* ==========================================================================
+     7. ACTIVITY 1: SYMMETRY-SCALED MOTIF / IMAGE FRIEZE GENERATOR
+     ========================================================================== */
+  function getQuarterSourceAspectRatio() {
+    if (state.quarter.sourceType === 'photo' && state.quarter.photoImg) {
+      const img = state.quarter.photoImg;
+      const isSwapped = state.quarter.photoRot90 % 180 !== 0;
+      const w = isSwapped ? img.height : img.width;
+      const h = isSwapped ? img.width : img.height;
+      return Math.max(0.45, Math.min(1.8, w / Math.max(1, h)));
+    }
+    return 0.85;
+  }
+
+  function getAdaptiveTileMetrics(canvasH, groupCode) {
+    const layout = FRIEZE_GROUPS[groupCode].tileLayout;
+    const bandH = canvasH * 0.84;
+    const yTop = (canvasH - bandH) / 2;
+    // Shrink height by 1/2 when 2 rows are required (e.g. horizontal mirror line),
+    // otherwise use full band height (1x1 scale)!
+    const cellH = bandH / layout.rows;
+    const aspect = getQuarterSourceAspectRatio();
+    // Shrink width by the exact same factor (preserving aspect ratio) so both directions scale together!
+    const cellW = Math.round(cellH * aspect);
+    const periodL = cellW * layout.cols;
+    return { layout, bandH, yTop, cellW, cellH, periodL };
+  }
+
+  const qBitmapCache = new Map();
+
+  function quarterShapePath(c, tool, a, b) {
+    const x0 = Math.min(a.x, b.x), x1 = Math.max(a.x, b.x), y0 = Math.min(a.y, b.y), y1 = Math.max(a.y, b.y);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, rx = Math.max(0.5, (x1 - x0) / 2), ry = Math.max(0.5, (y1 - y0) / 2);
+    c.beginPath();
+    const poly = (pts) => { pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); c.closePath(); };
+    if (tool === 'line') { c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); }
+    else if (tool === 'rect') c.rect(x0, y0, x1 - x0, y1 - y0);
+    else if (tool === 'ellipse') c.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    else if (tool === 'triangle') poly([[cx, y0], [x1, y1], [x0, y1]]);
+    else if (tool === 'diamond') poly([[cx, y0], [x1, cy], [cx, y1], [x0, cy]]);
+    else if (tool === 'hexagon') poly([0, 1, 2, 3, 4, 5].map((k) => [cx + rx * Math.cos(k * Math.PI / 3), cy + ry * Math.sin(k * Math.PI / 3)]));
+    else if (tool === 'star') poly([...Array(10).keys()].map((k) => { const r = k % 2 ? 0.42 : 1, t = -Math.PI / 2 + k * Math.PI / 5; return [cx + rx * r * Math.cos(t), cy + ry * r * Math.sin(t)]; }));
+  }
+
+  function floodFillQuarter(cv, c, st, W, H, col) {
+    const t = document.createElement('canvas'); t.width = W; t.height = H;
+    const tc = t.getContext('2d');
+    tc.fillStyle = '#fff'; tc.fillRect(0, 0, W, H); tc.drawImage(cv, 0, 0);
+    const d = tc.getImageData(0, 0, W, H).data;
+    const sx = Math.min(W - 1, Math.max(0, Math.floor(st.points[0].x * W)));
+    const sy = Math.min(H - 1, Math.max(0, Math.floor(st.points[0].y * H)));
+    const s0 = (sy * W + sx) * 4, r0 = d[s0], g0 = d[s0 + 1], b0 = d[s0 + 2];
+    const mask = new Uint8Array(W * H), stack = [sy * W + sx];
+    while (stack.length) {
+      const p = stack.pop();
+      if (mask[p]) continue;
+      const i = p * 4;
+      if (Math.abs(d[i] - r0) + Math.abs(d[i + 1] - g0) + Math.abs(d[i + 2] - b0) > 90) continue;
+      mask[p] = 1;
+      const x = p % W;
+      if (x > 0) stack.push(p - 1);
+      if (x < W - 1) stack.push(p + 1);
+      if (p >= W) stack.push(p - W);
+      if (p < W * (H - 1)) stack.push(p + W);
+    }
+    const grow = new Uint8Array(mask);
+    for (let p = 0; p < W * H; p++) {
+      if (mask[p]) continue;
+      const x = p % W;
+      if ((x > 0 && mask[p - 1]) || (x < W - 1 && mask[p + 1]) || (p >= W && mask[p - W]) || (p < W * (H - 1) && mask[p + W])) grow[p] = 1;
+    }
+    const rgb = [1, 3, 5].map((k) => parseInt(col.slice(k, k + 2), 16));
+    const layer = (m, colour) => {
+      const l = document.createElement('canvas'); l.width = W; l.height = H;
+      const lc = l.getContext('2d'), im = lc.createImageData(W, H);
+      for (let p = 0; p < W * H; p++) if (m[p]) { im.data[p * 4] = colour[0]; im.data[p * 4 + 1] = colour[1]; im.data[p * 4 + 2] = colour[2]; im.data[p * 4 + 3] = 255; }
+      lc.putImageData(im, 0, 0);
+      return l;
+    };
+    c.globalCompositeOperation = 'destination-out'; c.drawImage(layer(mask, [0, 0, 0]), 0, 0);   // clear what was there
+    c.globalCompositeOperation = 'destination-over'; c.drawImage(layer(grow, rgb), 0, 0);          // paint fill beneath the outlines
+    c.globalCompositeOperation = 'source-over';
+  }
+
+  function getQuarterBitmap(w, h, scale, overrideColor) {
+    const sig = state.quarter.strokes.map((s) => {
+      const n = s.points.length, l = n ? s.points[n - 1] : { x: 0, y: 0 };
+      return `${s.tool || 'b'}${s.color}${s.size}${s.fill ? 1 : 0}.${n}.${Math.round(l.x * 1000)}.${Math.round(l.y * 1000)}`;
+    }).join('|');
+    const key = `${Math.round(w)}x${Math.round(h)}@${scale}|${overrideColor || ''}|${sig}`;
+    if (qBitmapCache.has(key)) return qBitmapCache.get(key);
+    const W = Math.max(1, Math.round(w * scale)), H = Math.max(1, Math.round(h * scale));
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const c = cv.getContext('2d');
+    state.quarter.strokes.forEach((st) => {
+      if (!st.points || st.points.length === 0) return;
+      const col = overrideColor || st.color, tool = st.tool || 'brush';
+      if (tool === 'fill') { floodFillQuarter(cv, c, st, W, H, col); return; }
+      const pts = st.points.map((p) => ({ x: p.x * W, y: p.y * H }));
+      c.strokeStyle = col; c.fillStyle = col;
+      c.lineWidth = Math.max(2, st.size * (h / 170)) * scale;
+      c.lineCap = 'round'; c.lineJoin = 'round';
+      if (tool === 'brush') {
+        if (pts.length === 1) { c.beginPath(); c.arc(pts[0].x, pts[0].y, c.lineWidth / 2, 0, Math.PI * 2); c.fill(); }
+        else { c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y))); c.stroke(); }
+      } else if (pts.length >= 2) {
+        quarterShapePath(c, tool, pts[0], pts[pts.length - 1]);
+        if (st.fill && tool !== 'line') c.fill();
+        c.stroke();
+      }
+    });
+    if (qBitmapCache.size > 14) qBitmapCache.clear();
+    qBitmapCache.set(key, cv);
+    return cv;
+  }
+
+  function drawMotifCell(ctx, x, y, w, h, op, overrideColor) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+
+    ctx.translate(x + w / 2, y + h / 2);
+    if (op === 'H') ctx.scale(1, -1);
+    else if (op === 'V') ctx.scale(-1, 1);
+    else if (op === 'R') ctx.scale(-1, -1);
+    ctx.translate(-w / 2, -h / 2);
+
+    if (state.quarter.sourceType === 'photo' && state.quarter.photoImg) {
+      const img = state.quarter.photoImg;
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      ctx.rotate((state.quarter.photoRot90 * Math.PI) / 180);
+      if (state.quarter.photoFlipX) ctx.scale(-1, 1);
+
+      const isSwapped = state.quarter.photoRot90 % 180 !== 0;
+      const targetW = isSwapped ? h : w;
+      const targetH = isSwapped ? w : h;
+
+      // Fit entire uploaded image cleanly inside the cell (contain * zoom) so letters/motifs aren't cropped
+      const scale = Math.min(targetW / img.width, targetH / img.height) * state.quarter.photoZoom;
+      const drawW = img.width * scale;
+      const drawH = img.height * scale;
+      ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+      ctx.restore();
+    } else {
+      const sc = Math.round(Math.abs(ctx.getTransform().a || 1) * 100) / 100;
+      ctx.drawImage(getQuarterBitmap(w, h, sc, overrideColor), 0, 0, w, h);
+    }
+
+    if (overrideColor) {
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillStyle = 'rgba(225, 29, 72, 0.55)';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    ctx.restore();
+  }
+
+  function renderAdaptiveFriezeStrip(ctx, xStart, xEnd, canvasH, groupCode, showGrid, overrideColor) {
+    const { layout, bandH, yTop, cellW, cellH, periodL } = getAdaptiveTileMetrics(canvasH, groupCode);
+
+    const kMin = Math.floor(xStart / periodL) - 1;
+    const kMax = Math.ceil(xEnd / periodL) + 1;
+
+    for (let k = kMin; k <= kMax; k++) {
+      const rx = k * periodL;
+
+      layout.cells.forEach((cell) => {
+        const cx = rx + cell.c * cellW;
+        const cy = yTop + cell.r * cellH;
+        drawMotifCell(ctx, cx, cy, cellW, cellH, cell.op, overrideColor);
+      });
+
+      if (showGrid) {
+        ctx.save();
+        if (k === 0) {
+          ctx.strokeStyle = '#059669';
+          ctx.lineWidth = 2.4;
+          ctx.strokeRect(rx, yTop, periodL, bandH);
+        } else {
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(rx, yTop, periodL, bandH);
+        }
+
+        // Draw internal sub-cell divisions if rows === 2 or cols === 2
+        ctx.strokeStyle = 'rgba(37, 99, 235, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        if (layout.cols === 2) {
+          ctx.beginPath();
+          ctx.moveTo(rx + cellW, yTop);
+          ctx.lineTo(rx + cellW, yTop + bandH);
+          ctx.stroke();
+        }
+        if (layout.rows === 2) {
+          ctx.beginPath();
+          ctx.moveTo(rx, yTop + cellH);
+          ctx.lineTo(rx + periodL, yTop + cellH);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    return periodL;
+  }
+
+  function getEditorCell() {
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = quarterTileCanvas.width / dpr, cssH = quarterTileCanvas.height / dpr;
+    const w = Math.min(cssW, Math.round(cssH * getQuarterSourceAspectRatio()));
+    return { cssW, cssH, x0: Math.round((cssW - w) / 2), w, h: cssH };
+  }
+
+  function quarterNorm(e) {
+    const rect = quarterTileCanvas.getBoundingClientRect();
+    const c = getEditorCell();
+    const px = (e.clientX - rect.left) * (c.cssW / rect.width) - c.x0;
+    const py = (e.clientY - rect.top) * (c.cssH / rect.height);
+    return { x: Math.max(0, Math.min(1, px / c.w)), y: Math.max(0, Math.min(1, py / c.h)) };
+  }
+
+  function renderQuarterTileEditor() {
+    const dpr = window.devicePixelRatio || 1;
+    const c = getEditorCell();
+    const ctx = quarterTileCtx;
+
+    ctx.save();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, c.cssW, c.cssH);
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(0, 0, c.cssW, c.cssH);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(c.x0, 0, c.w, c.h);
+
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(c.x0 + c.w / 2, 0); ctx.lineTo(c.x0 + c.w / 2, c.h);
+    ctx.moveTo(c.x0, c.h / 2); ctx.lineTo(c.x0 + c.w, c.h / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.strokeRect(c.x0 + 0.5, 0.5, c.w - 1, c.h - 1);
+
+    const activeStrokes = state.quarter.currentStroke
+      ? [...state.quarter.strokes, state.quarter.currentStroke]
+      : state.quarter.strokes;
+    const savedStrokes = state.quarter.strokes;
+    state.quarter.strokes = activeStrokes;
+    drawMotifCell(ctx, c.x0, 0, c.w, c.h, 'I', null);
+    state.quarter.strokes = savedStrokes;
+
+    if (state.quarter.sourceType === 'draw' && activeStrokes.length === 0) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Draw inside this box,', c.x0 + c.w / 2, c.h / 2 - 6);
+      ctx.fillText('or click \u201cLetter F\u201d', c.x0 + c.w / 2, c.h / 2 + 12);
+    }
+    ctx.restore();
+  }
+
+  function updateQuarterDiagramUI() {
+    const g = FRIEZE_GROUPS[state.quarter.group];
+    const layout = g.tileLayout;
+    document.getElementById('qScaleBadge').textContent = `Scale: ${layout.scaleLabel}`;
+    document.getElementById('qDiagramGroupLabel').textContent = `${g.code} (${g.name})`;
+
+    const diagram = document.getElementById('quarterMapDiagram');
+    diagram.className = 'quarter-map' + (layout.cols === 1 ? ' cols-1' : '');
+    diagram.innerHTML = '';
+
+    layout.cells.forEach((cell) => {
+      const div = document.createElement('div');
+      div.className = 'q-cell' + (cell.op === 'I' ? ' source' : '');
+      div.textContent = cell.label;
+      diagram.appendChild(div);
+    });
+  }
+
+  function renderQuarterOutput() {
+    updateQuarterDiagramUI();
+    if (state.quarter.viewMode === 'single') {
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = quarterOutputCanvas.width / dpr;
+      const cssH = quarterOutputCanvas.height / dpr;
+      quarterOutputCtx.save();
+      quarterOutputCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      quarterOutputCtx.clearRect(0, 0, cssW, cssH);
+      quarterOutputCtx.fillStyle = '#ffffff';
+      quarterOutputCtx.fillRect(0, 0, cssW, cssH);
+
+      renderAdaptiveFriezeStrip(
+        quarterOutputCtx,
+        0,
+        cssW,
+        cssH,
+        state.quarter.group,
+        state.quarter.showRectGrid,
+        null
+      );
+      quarterOutputCtx.restore();
+    } else {
+      renderAll7QuarterGallery();
+    }
+  }
+
+  function renderAll7QuarterGallery() {
+    const container = document.getElementById('all7GalleryContainer');
+    container.innerHTML = '';
+    const dpr = window.devicePixelRatio || 1;
+
+    Object.values(FRIEZE_GROUPS).forEach((g) => {
+      const item = document.createElement('div');
+      item.className = 'gallery-item';
+      item.innerHTML = `
+        <div class="gallery-item-header">
+          <div>
+            <strong>${g.code} &mdash; ${g.name}</strong>
+            <span class="badge" style="margin-left:0.4rem;">${g.tileLayout.scaleLabel}</span>
+            <span style="font-size:0.78rem; color:var(--text-muted); margin-left:0.35rem;">(${g.desc})</span>
+          </div>
+          <button class="btn primary sm" data-testgroup="${g.code}">&#128269; Test in Symmetry Analyser</button>
+        </div>
+        <div class="canvas-stage" style="margin:0;">
+          <canvas height="130"></canvas>
+        </div>
+      `;
+      container.appendChild(item);
+
+      const cvs = item.querySelector('canvas');
+      const rect = cvs.parentElement.getBoundingClientRect();
+      const w = Math.max(300, Math.floor(rect.width));
+      setCanvasDpiSize(cvs, w, 130);
+      const ctx = cvs.getContext('2d');
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, 130);
+      renderAdaptiveFriezeStrip(ctx, 0, w, 130, g.code, state.quarter.showRectGrid, null);
+      ctx.restore();
+
+      item.querySelector('button').addEventListener('click', () => {
+        launchQuarterPatternInAnalyzer(g.code);
+      });
+    });
+  }
+
+  function launchQuarterPatternInAnalyzer(groupCode) {
+    state.quarter.group = groupCode;
+    const dpr = window.devicePixelRatio || 1;
+    const aH = ANALYZER_H;
+    const { periodL } = getAdaptiveTileMetrics(aH, groupCode);
+
+    state.analyzer.sourceMode = 'quarter';
+    state.analyzer.isMystery = false;
+    state.analyzer.period = periodL;
+    state.analyzer.yMid = aH / 2;
+    state.analyzer.manualOffsetX = 0;
+    state.analyzer.progress = 0;
+    state.analyzer.markedSymmetries = [];
+    state.analyzer.isSnapped = false;
+    document.getElementById('photoCalibrationWizard').classList.remove('visible');
+    resetChecklist();
+    updateMarkedCountUI();
+    syncScrubberUI();
+    updateAnalyzerBadge();
+    switchTab('analyzer');
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  }
+
+  /* ==========================================================================
+     8. ACTIVITY 2: PHOTO STRAIGHTENING, BILATERAL EXTENSION & ANALYZER BUFFERS
+     ========================================================================== */
+  function rebuildStraightenedPhoto() {
+    const img = state.analyzer.rawPhotoImg;
+    if (!img) return;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = analyzerCanvas.width / dpr;
+    const cssH = analyzerCanvas.height / dpr;
+
+    straightenedPhotoCanvas.width = cssW * dpr;
+    straightenedPhotoCanvas.height = cssH * dpr;
+    straightenedPhotoCtx.save();
+    straightenedPhotoCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    straightenedPhotoCtx.clearRect(0, 0, cssW, cssH);
+
+    const maxW = cssW * 0.90;
+    const maxH = cssH * 0.72;
+    const scale = Math.min(maxW / img.width, maxH / img.height);
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+
+    straightenedPhotoCtx.translate(cssW / 2, cssH / 2);
+    straightenedPhotoCtx.rotate((state.analyzer.straightenDeg * Math.PI) / 180);
+    straightenedPhotoCtx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+    straightenedPhotoCtx.restore();
+
+    // Determine the horizontal span of the drawn photo so we can extract the central L-wide unit
+    const rad = Math.abs((state.analyzer.straightenDeg * Math.PI) / 180);
+    const projectedW = drawW * Math.cos(rad) + drawH * Math.sin(rad);
+    const photoLeft = Math.max(0, cssW / 2 - projectedW / 2);
+    const photoRight = Math.min(cssW, cssW / 2 + projectedW / 2);
+    const photoW = Math.max(20, photoRight - photoLeft);
+    const photoCenterX = (photoLeft + photoRight) / 2;
+
+    const L = state.analyzer.period;
+    const tileW = Math.min(L, photoW);
+    const tileLeft = Math.max(photoLeft, Math.min(photoRight - tileW, photoCenterX - tileW / 2));
+
+    state.analyzer.photoTileLeft = tileLeft;
+    state.analyzer.photoTileWidth = tileW;
+  }
+
+  function drawExtendedPhotoStrip(ctx, xStart, xEnd, cssW, cssH) {
+    const dpr = window.devicePixelRatio || 1;
+    const L = state.analyzer.period;
+
+    if (!state.analyzer.extendBothSides) {
+      ctx.drawImage(
+        straightenedPhotoCanvas,
+        0, 0, straightenedPhotoCanvas.width, straightenedPhotoCanvas.height,
+        0, 0, cssW, cssH
+      );
+      return;
+    }
+
+    // Recompute tile bounds for current L
+    const img = state.analyzer.rawPhotoImg;
+    const maxW = cssW * 0.90;
+    const maxH = cssH * 0.72;
+    const scale = Math.min(maxW / img.width, maxH / img.height);
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+    const rad = Math.abs((state.analyzer.straightenDeg * Math.PI) / 180);
+    const projectedW = drawW * Math.cos(rad) + drawH * Math.sin(rad);
+    const photoLeft = Math.max(0, cssW / 2 - projectedW / 2);
+    const photoRight = Math.min(cssW, cssW / 2 + projectedW / 2);
+    const photoW = Math.max(20, photoRight - photoLeft);
+    const photoCenterX = (photoLeft + photoRight) / 2;
+
+    const tileW = Math.min(L, photoW);
+    const tileLeft = Math.max(photoLeft, Math.min(photoRight - tileW, photoCenterX - tileW / 2));
+    state.analyzer.photoTileLeft = tileLeft;
+    state.analyzer.photoTileWidth = tileW;
+
+    const kMin = Math.floor((xStart - tileLeft) / L) - 1;
+    const kMax = Math.ceil((xEnd - tileLeft) / L) + 1;
+
+    for (let k = kMin; k <= kMax; k++) {
+      const destX = tileLeft + k * L;
+      ctx.drawImage(
+        straightenedPhotoCanvas,
+        tileLeft * dpr, 0, tileW * dpr, cssH * dpr,
+        destX, 0, tileW, cssH
+      );
+    }
+  }
+
+  function buildPhotoCorrelationSample(cssW, cssH) {
+    // Build a fast downsampled grayscale strip of baseBuffer for real-time photo symmetry snapping
+    const sampleW = Math.min(900, Math.round(cssW * 1.5));
+    const sampleH = 56;
+    const bandHalf = Math.max(24, Math.min(cssH * 0.42, 95));
+    const dpr = window.devicePixelRatio || 1;
+    const L = state.analyzer.period;
+    const pad = Math.max(L * 5, cssW * 1.5);
+
+    const tmpCvs = document.createElement('canvas');
+    tmpCvs.width = sampleW;
+    tmpCvs.height = sampleH;
+    const tmpCtx = tmpCvs.getContext('2d');
+
+    tmpCtx.drawImage(
+      baseBuffer,
+      pad * dpr,
+      Math.max(0, state.analyzer.yMid - bandHalf) * dpr,
+      cssW * dpr,
+      Math.min(cssH, bandHalf * 2) * dpr,
+      0, 0, sampleW, sampleH
+    );
+
+    const imgData = tmpCtx.getImageData(0, 0, sampleW, sampleH).data;
+    const gray = new Float32Array(sampleW * sampleH);
+    const alpha = new Uint8Array(sampleW * sampleH);
+    for (let i = 0; i < sampleW * sampleH; i++) {
+      const r = imgData[i * 4];
+      const g = imgData[i * 4 + 1];
+      const b = imgData[i * 4 + 2];
+      const a = imgData[i * 4 + 3];
+      gray[i] = 0.299 * r + 0.587 * g + 0.114 * b;
+      alpha[i] = a;
+    }
+    state.analyzer.photoGrayGrid = { gray, alpha, sampleW, sampleH, cssW };
+  }
+
+  function rebuildAnalyzerBuffers() {
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = analyzerCanvas.width / dpr;
+    const cssH = analyzerCanvas.height / dpr;
+    if (state.analyzer.sourceMode === 'quarter') {
+      state.analyzer.period = getAdaptiveTileMetrics(cssH, state.quarter.group).periodL;
+    }
+    const L = state.analyzer.period;
+
+    const pad = Math.max(L * 5, cssW * 1.5);
+    const bufW = cssW + pad * 2;
+    const bufH = cssH;
+
+    baseBuffer.width = bufW * dpr;
+    baseBuffer.height = bufH * dpr;
+    overlayBuffer.width = bufW * dpr;
+    overlayBuffer.height = bufH * dpr;
+
+    [baseBufCtx, overlayBufCtx].forEach((c) => {
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.clearRect(0, 0, bufW, bufH);
+      c.translate(pad, 0);
+    });
+
+    const activeGroup = state.analyzer.isMystery
+      ? state.analyzer.mysteryGroup
+      : state.analyzer.builtinGroup;
+
+    const overlayColor = state.analyzer.tintOverlay ? '#e11d48' : '#1e293b';
+
+    if (state.analyzer.sourceMode === 'photo' && state.analyzer.rawPhotoImg) {
+      drawExtendedPhotoStrip(baseBufCtx, -pad, cssW + pad, cssW, cssH);
+      drawExtendedPhotoStrip(overlayBufCtx, -pad, cssW + pad, cssW, cssH);
+      if (state.analyzer.tintOverlay) {
+        overlayBufCtx.save();
+        overlayBufCtx.globalCompositeOperation = 'source-atop';
+        overlayBufCtx.fillStyle = 'rgba(225, 29, 72, 0.55)';
+        overlayBufCtx.fillRect(-pad, 0, cssW + pad * 2, cssH);
+        overlayBufCtx.restore();
+      }
+      buildPhotoCorrelationSample(cssW, cssH);
+    } else if (state.analyzer.sourceMode === 'saved' && state.activeSavedPattern && state.activeSavedPattern.tileImg) {
+      const tileImg = state.activeSavedPattern.tileImg;
+      const kMin = Math.floor(-pad / L) - 1;
+      const kMax = Math.ceil((cssW + pad) / L) + 1;
+      for (let k = kMin; k <= kMax; k++) {
+        baseBufCtx.drawImage(tileImg, k * L, 0, L, cssH);
+        overlayBufCtx.drawImage(tileImg, k * L, 0, L, cssH);
+      }
+      if (state.analyzer.tintOverlay) {
+        overlayBufCtx.save();
+        overlayBufCtx.globalCompositeOperation = 'source-atop';
+        overlayBufCtx.fillStyle = 'rgba(225, 29, 72, 0.55)';
+        overlayBufCtx.fillRect(-pad, 0, cssW + pad * 2, cssH);
+        overlayBufCtx.restore();
+      }
+      if (state.activeSavedPattern.group === 'photo') {
+        buildPhotoCorrelationSample(cssW, cssH);
+      }
+    } else if (state.analyzer.sourceMode === 'quarter') {
+      renderAdaptiveFriezeStrip(baseBufCtx, -pad, cssW + pad, bufH, state.quarter.group, false, null);
+      renderAdaptiveFriezeStrip(
+        overlayBufCtx, -pad, cssW + pad, bufH, state.quarter.group, false,
+        state.analyzer.tintOverlay ? '#e11d48' : null
+      );
+    } else if (state.analyzer.sourceMode === 'custom' && state.creator.strokes.length > 0) {
+      renderFriezeStrip(
+        baseBufCtx, -pad, cssW + pad, bufH, L,
+        state.creator.group, null, null, state.creator.strokes
+      );
+      renderFriezeStrip(
+        overlayBufCtx, -pad, cssW + pad, bufH, L,
+        state.creator.group, null, state.analyzer.tintOverlay ? '#e11d48' : null, state.creator.strokes
+      );
+    } else {
+      renderFriezeStrip(
+        baseBufCtx, -pad, cssW + pad, bufH, L,
+        activeGroup, state.analyzer.motifStyle, '#1e293b', null
+      );
+      renderFriezeStrip(
+        overlayBufCtx, -pad, cssW + pad, bufH, L,
+        activeGroup, state.analyzer.motifStyle, overlayColor, null
+      );
+    }
+  }
+
+  /* ==========================================================================
+     9. MAGNETIC SNAPPING ENGINE FOR SYMMETRY LINES & CENTERS
+     ========================================================================== */
+  function getActiveKnownGroupCode() {
+    if (state.analyzer.sourceMode === 'builtin') {
+      return state.analyzer.isMystery ? state.analyzer.mysteryGroup : state.analyzer.builtinGroup;
+    }
+    if (state.analyzer.sourceMode === 'quarter') return state.quarter.group;
+    if (state.analyzer.sourceMode === 'custom') return state.creator.group;
+    if (state.analyzer.sourceMode === 'saved' && state.activeSavedPattern) {
+      return state.activeSavedPattern.group !== 'photo' ? state.activeSavedPattern.group : null;
+    }
+    return null;
+  }
+
+  function evaluatePhotoAlignmentError(tType, candidateManualX, baseX0) {
+    const grid = state.analyzer.photoGrayGrid;
+    if (!grid) return Infinity;
+    const { gray, alpha, sampleW, sampleH, cssW } = grid;
+    const scaleX = sampleW / cssW;
+
+    let sumDiff = 0;
+    let count = 0;
+
+    for (let sy = 1; sy < sampleH - 1; sy += 2) {
+      const mirrorY = sampleH - 1 - sy;
+      for (let sx = 4; sx < sampleW - 4; sx += 2) {
+        const idx1 = sy * sampleW + sx;
+        if (alpha[idx1] < 180) continue;
+
+        const origX = sx / scaleX;
+        let mappedX = origX;
+        let mappedY = sy;
+
+        if (tType === 'T') {
+          mappedX = origX - (state.analyzer.period + candidateManualX);
+        } else if (tType === 'H') {
+          mappedX = origX - candidateManualX;
+          mappedY = mirrorY;
+        } else if (tType === 'V') {
+          const x0 = baseX0 + candidateManualX / 2;
+          mappedX = 2 * x0 - origX;
+        } else if (tType === 'R') {
+          const x0 = baseX0 + candidateManualX / 2;
+          mappedX = 2 * x0 - origX;
+          mappedY = mirrorY;
+        } else if (tType === 'G') {
+          mappedX = origX - (state.analyzer.period / 2 + candidateManualX);
+          mappedY = mirrorY;
+        }
+
+        const msx = Math.round(mappedX * scaleX);
+        if (msx < 0 || msx >= sampleW) continue;
+        const idx2 = mappedY * sampleW + msx;
+        if (alpha[idx2] < 180) continue;
+
+        sumDiff += Math.abs(gray[idx1] - gray[idx2]);
+        count++;
+      }
+    }
+
+    return count > 30 ? sumDiff / count : Infinity;
+  }
+
+  function applyMagneticSnap(cssW) {
+    const prevSnapped = state.analyzer.isSnapped;
+    state.analyzer.isSnapped = false;
+    state.analyzer.snapMessage = '';
+
+    if (!state.analyzer.magneticSnap || state.analyzer.progress < 0.92) {
+      updateSnapBadgeUI();
+      return;
+    }
+
+    const L = state.analyzer.period;
+    const tType = state.analyzer.transform;
+    const baseX0 = state.analyzer.baseAxisFrac * L;
+    const groupCode = getActiveKnownGroupCode();
+
+    // Case A: Exact mathematical symmetry snapping for known Frieze groups
+    if (groupCode && FRIEZE_GROUPS[groupCode]) {
+      const g = FRIEZE_GROUPS[groupCode];
+      const sym = g.symmetries;
+
+      if (tType === 'T') {
+        const curShift = L + state.analyzer.manualOffsetX;
+        const nearestShift = Math.round(curShift / L) * L;
+        if (Math.abs(curShift - nearestShift) <= 14) {
+          state.analyzer.manualOffsetX = nearestShift - L;
+          state.analyzer.isSnapped = true;
+          state.analyzer.snapMessage = `\ud83e\uddf2 Snapped to Translation (${Math.round(nearestShift / L)}L)`;
+        }
+      } else if (tType === 'H' && sym.H) {
+        if (state.analyzer.drawn && Math.abs(axisY() - state.analyzer.yMid) <= 12) {
+          state.analyzer.drawnY = state.analyzer.yMid;
+          state.analyzer.isSnapped = true;
+          state.analyzer.snapMessage = '\ud83e\uddf2 Snapped to Horizontal Mirror Line';
+        }
+      } else if (tType === 'V' && sym.V) {
+        const curX0 = baseX0 + state.analyzer.manualOffsetX / 2;
+        const halfL = L / 2;
+        const nearestX0 = Math.round(curX0 / halfL) * halfL;
+        if (Math.abs(curX0 - nearestX0) <= 12) {
+          state.analyzer.manualOffsetX = (nearestX0 - baseX0) * 2;
+          state.analyzer.isSnapped = true;
+          state.analyzer.snapMessage = `\ud83e\uddf2 Snapped to Vertical Mirror Line (x\u2080 = ${Math.round(nearestX0)}px)`;
+        }
+      } else if (tType === 'R' && sym.R) {
+        const curX0 = baseX0 + state.analyzer.manualOffsetX / 2;
+        let nearestX0;
+        if (groupCode === 'p2mg') {
+          // 180° rotation centers in p2mg are at (k + 0.25)L and (k + 0.75)L
+          nearestX0 = (Math.round((curX0 - L * 0.25) / (L / 2)) * (L / 2)) + L * 0.25;
+        } else {
+          nearestX0 = Math.round(curX0 / (L / 2)) * (L / 2);
+        }
+        if (Math.abs(curX0 - nearestX0) <= 12) {
+          state.analyzer.manualOffsetX = (nearestX0 - baseX0) * 2;
+          state.analyzer.isSnapped = true;
+          state.analyzer.snapMessage = `\ud83e\uddf2 Snapped to 180\u00b0 Rotation Centre (x\u2080 = ${Math.round(nearestX0)}px)`;
+        }
+      } else if (tType === 'G' && (sym.G || sym.H)) {
+        // true glide (no H mirror): v = L/2 + kL. With an H mirror, v = kL (k != 0) also works, as mirror + translation.
+        const off = sym.G ? L / 2 : 0;
+        const curTotalShift = L / 2 + state.analyzer.manualOffsetX;
+        const k = Math.round((curTotalShift - off) / L);
+        const nearestShift = k * L + off;
+        if ((sym.G || k !== 0) && Math.abs(curTotalShift - nearestShift) <= 14) {
+          state.analyzer.manualOffsetX = nearestShift - L / 2;
+          state.analyzer.isSnapped = true;
+          state.analyzer.snapMessage = sym.G ? '\ud83e\uddf2 Snapped to True Glide Reflection' : '\ud83e\uddf2 Snapped to Mirror + Translation (not a true glide)';
+        }
+      }
+    } else if (state.analyzer.photoGrayGrid) {
+      // Case B: Image-correlation magnetic snapping for uploaded photos!
+      const centerManualX = state.analyzer.manualOffsetX;
+      let bestOffset = centerManualX;
+      let bestErr = Infinity;
+      let sumErr = 0;
+      let samples = 0;
+
+      for (let d = -14; d <= 14; d += 1) {
+        const cand = Math.round(centerManualX) + d;
+        const err = evaluatePhotoAlignmentError(tType, cand, baseX0);
+        if (isFinite(err)) {
+          sumErr += err;
+          samples++;
+          if (err < bestErr) {
+            bestErr = err;
+            bestOffset = cand;
+          }
+        }
+      }
+
+      if (samples > 5) {
+        const avgErr = sumErr / samples;
+        // Snap when there is a clear alignment minimum (significantly sharper match than surrounding offsets)
+        if (bestErr < 34 && bestErr < avgErr * 0.72) {
+          state.analyzer.manualOffsetX = bestOffset;
+          state.analyzer.isSnapped = true;
+          const labels = {
+            T: '\ud83e\uddf2 Snapped to Translation Match',
+            H: '\ud83e\uddf2 Snapped to Horizontal Mirror Line',
+            V: '\ud83e\uddf2 Snapped to Vertical Mirror Line',
+            R: '\ud83e\uddf2 Snapped to 180\u00b0 Rotation Centre',
+            G: '\ud83e\uddf2 Snapped to Glide Reflection Match'
+          };
+          state.analyzer.snapMessage = labels[tType] || '\ud83e\uddf2 Snapped to Symmetry';
+        }
+      }
+    }
+
+    if (state.analyzer.isSnapped && !prevSnapped) {
+      playMagneticClickSound();
+    }
+    updateSnapBadgeUI();
+  }
+
+  function updateSnapBadgeUI() {
+    const badge = document.getElementById('snapStatusBadge');
+    const stage = document.getElementById('analyzerStage');
+    if (state.analyzer.isSnapped) {
+      badge.style.display = 'inline-flex';
+      badge.textContent = state.analyzer.snapMessage;
+      stage.classList.add('snapped');
+    } else {
+      badge.style.display = 'none';
+      stage.classList.remove('snapped');
+    }
+  }
+
+  /* ==========================================================================
+     10. MAIN ANALYZER RENDERER (CALIBRATION + MAGNETIC DRAG + MARKED ELEMENTS)
+     ========================================================================== */
+  function renderAnalyzer() {
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = analyzerCanvas.width / dpr;
+    const cssH = analyzerCanvas.height / dpr;
+    const L = state.analyzer.period;
+    const pad = Math.max(L * 5, cssW * 1.5);
+    const yMid = state.analyzer.yMid;
+
+    analyzerCtx.save();
+    analyzerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    analyzerCtx.clearRect(0, 0, cssW, cssH);
+    analyzerCtx.fillStyle = '#ffffff';
+    analyzerCtx.fillRect(0, 0, cssW, cssH);
+
+    // ------------------------------------------------------------------------
+    // CASE 1: PHOTO GUIDED CALIBRATION STEPS (Straighten -> Midline -> Period)
+    // ------------------------------------------------------------------------
+    if (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep !== 'analyze') {
+      const step = state.analyzer.calStep;
+      updateSnapBadgeUI();
+
+      analyzerCtx.drawImage(
+        straightenedPhotoCanvas,
+        0, 0, straightenedPhotoCanvas.width, straightenedPhotoCanvas.height,
+        0, 0, cssW, cssH
+      );
+
+      if (step === 'straighten') {
+        analyzerCtx.strokeStyle = 'rgba(37, 99, 235, 0.42)';
+        analyzerCtx.lineWidth = 1.2;
+        for (let gy = 28; gy < cssH; gy += 28) {
+          analyzerCtx.beginPath();
+          analyzerCtx.moveTo(0, gy);
+          analyzerCtx.lineTo(cssW, gy);
+          analyzerCtx.stroke();
+        }
+        analyzerCtx.strokeStyle = '#e11d48';
+        analyzerCtx.lineWidth = 2;
+        analyzerCtx.beginPath();
+        analyzerCtx.moveTo(0, cssH / 2);
+        analyzerCtx.lineTo(cssW, cssH / 2);
+        analyzerCtx.stroke();
+
+        if (state.analyzer.levelPoints.length > 0) {
+          analyzerCtx.fillStyle = '#059669';
+          analyzerCtx.strokeStyle = '#059669';
+          analyzerCtx.lineWidth = 2;
+          state.analyzer.levelPoints.forEach((pt) => {
+            analyzerCtx.beginPath();
+            analyzerCtx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+            analyzerCtx.fill();
+          });
+        }
+      } else if (step === 'midline') {
+        analyzerCtx.save();
+        analyzerCtx.globalAlpha = 0.58;
+        analyzerCtx.translate(0, yMid);
+        analyzerCtx.scale(1, -1);
+        analyzerCtx.translate(0, -yMid);
+        analyzerCtx.drawImage(
+          straightenedPhotoCanvas,
+          0, 0, straightenedPhotoCanvas.width, straightenedPhotoCanvas.height,
+          0, 0, cssW, cssH
+        );
+        analyzerCtx.restore();
+
+        analyzerCtx.strokeStyle = '#2563eb';
+        analyzerCtx.lineWidth = 2.5;
+        analyzerCtx.setLineDash([8, 5]);
+        analyzerCtx.beginPath();
+        analyzerCtx.moveTo(0, yMid);
+        analyzerCtx.lineTo(cssW, yMid);
+        analyzerCtx.stroke();
+        analyzerCtx.setLineDash([]);
+
+        analyzerCtx.fillStyle = '#2563eb';
+        analyzerCtx.beginPath();
+        analyzerCtx.roundRect(14, yMid - 12, 162, 24, 12);
+        analyzerCtx.fill();
+        analyzerCtx.fillStyle = '#ffffff';
+        analyzerCtx.font = 'bold 11px sans-serif';
+        analyzerCtx.textAlign = 'center';
+        analyzerCtx.fillText('\u2195 Middle Line (Drag Copy)', 95, yMid + 4);
+      } else if (step === 'period') {
+        analyzerCtx.strokeStyle = 'rgba(5, 150, 105, 0.55)';
+        analyzerCtx.lineWidth = 1.5;
+        analyzerCtx.setLineDash([6, 4]);
+        analyzerCtx.beginPath();
+        analyzerCtx.moveTo(0, yMid);
+        analyzerCtx.lineTo(cssW, yMid);
+        analyzerCtx.stroke();
+        analyzerCtx.setLineDash([]);
+
+        const dx = state.analyzer.calPeriodDragX;
+        analyzerCtx.save();
+        analyzerCtx.globalAlpha = 0.6;
+        analyzerCtx.translate(dx, 0);
+        analyzerCtx.drawImage(
+          straightenedPhotoCanvas,
+          0, 0, straightenedPhotoCanvas.width, straightenedPhotoCanvas.height,
+          0, 0, cssW, cssH
+        );
+        analyzerCtx.restore();
+
+        const xStart = cssW * 0.35;
+        const xEnd = xStart + dx;
+        const rulerY = 26;
+        analyzerCtx.strokeStyle = '#059669';
+        analyzerCtx.fillStyle = '#059669';
+        analyzerCtx.lineWidth = 2.5;
+        analyzerCtx.beginPath();
+        analyzerCtx.moveTo(xStart, rulerY);
+        analyzerCtx.lineTo(xEnd, rulerY);
+        analyzerCtx.stroke();
+
+        analyzerCtx.beginPath();
+        analyzerCtx.moveTo(xStart, rulerY - 7);
+        analyzerCtx.lineTo(xStart, rulerY + 7);
+        analyzerCtx.moveTo(xEnd, rulerY - 7);
+        analyzerCtx.lineTo(xEnd, rulerY + 7);
+        analyzerCtx.stroke();
+
+        const midRuler = (xStart + xEnd) / 2;
+        analyzerCtx.beginPath();
+        analyzerCtx.roundRect(midRuler - 42, rulerY - 12, 84, 22, 11);
+        analyzerCtx.fill();
+        analyzerCtx.fillStyle = '#ffffff';
+        analyzerCtx.font = 'bold 11px sans-serif';
+        analyzerCtx.textAlign = 'center';
+        analyzerCtx.fillText(`L = ${Math.round(Math.abs(dx))} px`, midRuler, rulerY + 3);
+      }
+
+      analyzerCtx.restore();
+      return;
+    }
+
+    // ------------------------------------------------------------------------
+    // CASE 2: FULL SYMMETRY ANALYSIS MODE WITH MAGNETIC SNAPPING
+    // ------------------------------------------------------------------------
+    applyMagneticSnap(cssW);
+    const isSnapped = state.analyzer.isSnapped;
+
+    // Highlight one fundamental repeat tile L
+    const tileHighlightX = state.analyzer.sourceMode === 'photo' ? state.analyzer.photoTileLeft : 0;
+    analyzerCtx.fillStyle = 'rgba(37, 99, 235, 0.035)';
+    analyzerCtx.fillRect(tileHighlightX, 0, L, cssH);
+
+    analyzerCtx.strokeStyle = '#e2e8f0';
+    analyzerCtx.lineWidth = 1;
+    analyzerCtx.setLineDash([4, 4]);
+    analyzerCtx.beginPath();
+    analyzerCtx.moveTo(0, yMid);
+    analyzerCtx.lineTo(cssW, yMid);
+    analyzerCtx.stroke();
+    analyzerCtx.setLineDash([]);
+
+    // Base Pattern (extended to both sides)
+    analyzerCtx.drawImage(
+      baseBuffer,
+      0, 0, baseBuffer.width, baseBuffer.height,
+      -pad, 0, cssW + pad * 2, cssH
+    );
+
+    const geom = computeActiveTransformGeometry(cssW);
+    updateLiveReadout(geom, L);
+
+    // Test animation: a transparent copy undergoing exactly the transformation the user drew
+    if (state.analyzer.showOverlay) {
+      analyzerCtx.save();
+      analyzerCtx.globalAlpha = state.analyzer.overlayOpacity;
+      applyGeomTransform(analyzerCtx, geom);
+      analyzerCtx.drawImage(overlayBuffer, 0, 0, overlayBuffer.width, overlayBuffer.height, -pad, 0, cssW + pad * 2, cssH);
+      analyzerCtx.restore();
+    }
+
+    // Draw User's Marked Symmetries
+    if (state.analyzer.showMarked && state.analyzer.markedSymmetries.length > 0) {
+      drawMarkedSymmetries(analyzerCtx, cssW, cssH);
+    }
+
+    // Draw Active Live Axis / Center Handle on Top (with emerald glow when magnetically snapped!)
+    const activeAxisColor = isSnapped ? '#059669' : '#2563eb';
+
+    if (state.analyzer.drawn && (geom.type === 'H' || geom.type === 'G')) {
+      analyzerCtx.save();
+      if (isSnapped) { analyzerCtx.shadowColor = 'rgba(5, 150, 105, 0.55)'; analyzerCtx.shadowBlur = 10; }
+      analyzerCtx.strokeStyle = activeAxisColor;
+      analyzerCtx.lineWidth = isSnapped ? 3.2 : 2;
+      analyzerCtx.setLineDash(isSnapped ? [] : [7, 5]);
+      analyzerCtx.beginPath();
+      analyzerCtx.moveTo(0, geom.y);
+      analyzerCtx.lineTo(cssW, geom.y);
+      analyzerCtx.stroke();
+      analyzerCtx.restore();
+    }
+
+    if (state.analyzer.drawn && (geom.type === 'G' || geom.type === 'T')) {
+      const D = L * (geom.type === 'T' ? 1 : 0.5) + state.analyzer.manualOffsetX;
+      const x1 = state.analyzer.vecX0, x2 = x1 + D, ay = axisY(), dir = D >= 0 ? 1 : -1;
+      analyzerCtx.save();
+      analyzerCtx.strokeStyle = analyzerCtx.fillStyle = isSnapped ? '#059669' : '#b45309';
+      analyzerCtx.lineWidth = 4;
+      analyzerCtx.beginPath(); analyzerCtx.moveTo(x1, ay); analyzerCtx.lineTo(x2, ay); analyzerCtx.stroke();
+      analyzerCtx.beginPath(); analyzerCtx.arc(x1, ay, 5, 0, Math.PI * 2); analyzerCtx.fill();
+      analyzerCtx.beginPath();
+      analyzerCtx.moveTo(x2, ay); analyzerCtx.lineTo(x2 - dir * 12, ay - 7); analyzerCtx.lineTo(x2 - dir * 12, ay + 7);
+      analyzerCtx.closePath(); analyzerCtx.fill();
+      analyzerCtx.restore();
+    }
+
+    if (state.analyzer.drawn && (geom.type === 'V' || geom.type === 'R')) {
+      analyzerCtx.save();
+      const x0 = geom.x0;
+
+      if (isSnapped) {
+        analyzerCtx.shadowColor = 'rgba(5, 150, 105, 0.55)';
+        analyzerCtx.shadowBlur = 10;
+      }
+      analyzerCtx.strokeStyle = activeAxisColor;
+      analyzerCtx.lineWidth = isSnapped ? 3.2 : 2.2;
+      analyzerCtx.setLineDash(isSnapped ? [] : [7, 4]);
+      analyzerCtx.beginPath();
+      analyzerCtx.moveTo(x0, 0);
+      analyzerCtx.lineTo(x0, cssH);
+      analyzerCtx.stroke();
+      analyzerCtx.setLineDash([]);
+      analyzerCtx.shadowBlur = 0;
+
+      if (geom.type === 'R') {
+        if (isSnapped) {
+          analyzerCtx.strokeStyle = 'rgba(5, 150, 105, 0.45)';
+          analyzerCtx.lineWidth = 3;
+          analyzerCtx.beginPath();
+          analyzerCtx.arc(x0, geom.y, 16, 0, Math.PI * 2);
+          analyzerCtx.stroke();
+        }
+        analyzerCtx.fillStyle = isSnapped ? '#059669' : '#e11d48';
+        analyzerCtx.strokeStyle = '#ffffff';
+        analyzerCtx.lineWidth = 2;
+        analyzerCtx.beginPath();
+        analyzerCtx.moveTo(x0, geom.y - 9);
+        analyzerCtx.lineTo(x0 + 9, geom.y);
+        analyzerCtx.lineTo(x0, geom.y + 9);
+        analyzerCtx.lineTo(x0 - 9, geom.y);
+        analyzerCtx.closePath();
+        analyzerCtx.fill();
+        analyzerCtx.stroke();
+      }
+
+      const clampedHandleX = Math.max(36, Math.min(cssW - 36, x0));
+      analyzerCtx.fillStyle = activeAxisColor;
+      analyzerCtx.beginPath();
+      analyzerCtx.roundRect(clampedHandleX - 32, 4, 64, 20, 10);
+      analyzerCtx.fill();
+      analyzerCtx.fillStyle = '#ffffff';
+      analyzerCtx.font = 'bold 11px sans-serif';
+      analyzerCtx.textAlign = 'center';
+      analyzerCtx.fillText(isSnapped ? '\ud83e\uddf2 LOCKED' : '\u2194 x\u2080', clampedHandleX, 17.5);
+      analyzerCtx.restore();
+    }
+
+    analyzerCtx.restore();
+  }
+
+  function updateLiveReadout(geom, L) {
+    const labelEl = document.getElementById('liveReadoutLabel');
+    const textEl = document.getElementById('liveReadoutText');
+    if (!state.analyzer.drawn) {
+      labelEl.textContent = 'Your move:';
+      textEl.textContent = TOOL_HINT[state.analyzer.transform];
+      return;
+    }
+    const snapNote = state.analyzer.isSnapped ? ' \u2014 \ud83e\uddf2 Clicked into place! Press Space to pin.' : '';
+
+    if (geom.type === 'T') {
+      labelEl.textContent = 'Translation Shift:';
+      textEl.textContent = `${Math.round(geom.totalShiftX)} px (${(geom.totalShiftX / L).toFixed(2)} L)${snapNote}`;
+    } else if (geom.type === 'H') {
+      labelEl.textContent = 'Horizontal Mirror:';
+      textEl.textContent = `Midline y = ${Math.round(state.analyzer.yMid)} px (shift ${Math.round(geom.manualOffsetX)} px)${snapNote}`;
+    } else if (geom.type === 'V') {
+      labelEl.textContent = 'Vertical Mirror Axis:';
+      textEl.textContent = `x\u2080 = ${Math.round(geom.x0)} px${snapNote || ' \u2014 drag near a vertical mirror line to snap.'}`;
+    } else if (geom.type === 'R') {
+      labelEl.textContent = '180\u00b0 Rotation Centre:';
+      textEl.textContent = `(x\u2080 = ${Math.round(geom.x0)} px, y = ${Math.round(state.analyzer.yMid)} px)${snapNote || ' \u2014 drag near a rotation center to snap.'}`;
+    } else if (geom.type === 'G') {
+      labelEl.textContent = 'Glide Vector:';
+      textEl.textContent = `v = ${Math.round(geom.totalShiftX)} px (${(geom.totalShiftX / L).toFixed(2)} L) + midline flip${snapNote}`;
+    }
+    if (state.analyzer.showOverlay && state.analyzer.progress >= 0.999) {
+      const r = evaluateMatch(geom);
+      textEl.textContent += r.works
+        ? ` \u2014 \u2705 It works! The copy lands on the pattern (${r.pct}% match). Press Space to pin it.`
+        : ` \u2014 \u274c Not a match (${r.pct}%). Move what you drew and test again.`;
+      if (r.works && geom.type === 'G') {
+        const k = glideKind(geom);
+        textEl.textContent += k.trueGlide
+          ? ' This is a TRUE glide reflection: the flip alone and the slide alone both fail; only the combination works.'
+          : ' Not a true glide: the midline is itself a mirror and this slide is a translation symmetry, so the combination works only because each part works on its own.';
+      }
+    }
+  }
+
+  function axisY() { return state.analyzer.drawnY == null ? state.analyzer.yMid : state.analyzer.drawnY; }
+
+  const TOOL_HINT = {
+    T: 'Drag sideways on the pattern to draw the translation vector you think maps it onto itself, then press Test it.',
+    H: 'Click on the pattern to place the horizontal mirror line where you think it belongs, then press Test it.',
+    V: 'Click on the pattern to place a vertical mirror line where you think one belongs, then press Test it.',
+    R: 'Click where you think a 180\u00b0 rotation centre is, then press Test it.',
+    G: 'Drag along the glide axis to draw the glide vector (start \u2192 end), then press Test it.'
+  };
+
+  function clearDrawn() {
+    const a = state.analyzer;
+    a.drawn = false; a.showOverlay = false; a.drawnY = null; a.manualOffsetX = 0;
+    a.baseAxisFrac = 0; a.progress = 0; a.isSnapped = false;
+  }
+
+  function applyGeomTransform(ctx, g) {
+    const y = g.y;
+    if (g.type === 'T') ctx.translate(g.totalShiftX, 0);
+    else if (g.type === 'H') { ctx.translate(0, y); ctx.scale(1, g.scaleY); ctx.translate(0, -y); }
+    else if (g.type === 'V') { ctx.translate(g.x0, 0); ctx.scale(g.scaleX, 1); ctx.translate(-g.x0, 0); }
+    else if (g.type === 'R') { ctx.translate(g.x0, y); ctx.rotate(g.angleRad); ctx.translate(-g.x0, -y); }
+    else if (g.type === 'G') { ctx.translate(g.totalShiftX, y); ctx.scale(1, g.scaleY); ctx.translate(0, -y); }
+  }
+
+  // Compare the pattern with a copy that has undergone the drawn transformation (low-res ink difference)
+  function evaluateMatch(geom) {
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = analyzerCanvas.width / dpr, cssH = analyzerCanvas.height / dpr;
+    const pad = Math.max(state.analyzer.period * 5, cssW * 1.5);
+    const s = 0.25, w = Math.max(1, Math.round(cssW * s)), h = Math.max(1, Math.round(cssH * s));
+    const data = [0, 1].map((i) => {
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d');
+      x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
+      x.scale(s, s);
+      if (i) applyGeomTransform(x, geom);
+      x.drawImage(baseBuffer, 0, 0, baseBuffer.width, baseBuffer.height, -pad, 0, cssW + pad * 2, cssH);
+      return x.getImageData(0, 0, w, h).data;
+    });
+    let diff = 0, tot = 0;
+    for (let i = 0; i < data[0].length; i += 4) {
+      const a = 255 - data[0][i + 1], b = 255 - data[1][i + 1];
+      diff += Math.abs(a - b); tot += Math.max(a, b);
+    }
+    const score = tot > 0 ? 1 - diff / tot : 0;
+    const sp = state.activeSavedPattern;
+    const isPhoto = state.analyzer.sourceMode === 'photo' || (state.analyzer.sourceMode === 'saved' && sp && sp.group === 'photo');
+    return { works: score >= (isPhoto ? 0.55 : 0.85), pct: Math.round(score * 100) };
+  }
+
+  // A glide (reflect in the midline + slide by v) is "true" only if neither the reflection nor the slide is a symmetry alone
+  function glideKind(geom) {
+    const refl = evaluateMatch({ type: 'H', scaleY: -1, y: geom.y }).works;
+    const slide = evaluateMatch({ type: 'T', totalShiftX: geom.totalShiftX }).works;
+    return { refl, slide, trueGlide: !refl && !slide };
+  }
+
+  function computeActiveTransformGeometry(cssW, pOverride) {
+    const L = state.analyzer.period;
+    const p = pOverride == null ? state.analyzer.progress : pOverride;
+    const tType = state.analyzer.transform;
+    const manualX = state.analyzer.manualOffsetX;
+    const baseX0 = state.analyzer.baseAxisFrac * L;
+
+    if (tType === 'T') {
+      const ep = easeInOutCubic(p);
+      return { type: 'T', totalShiftX: ep * (L + manualX) };
+    }
+    if (tType === 'H') {
+      const ep = easeInOutCubic(p);
+      return { type: 'H', scaleY: Math.cos(Math.PI * ep), y: axisY() };
+    }
+    if (tType === 'V') {
+      const ep = easeInOutCubic(p);
+      const x0 = baseX0 + manualX / 2;
+      return { type: 'V', x0, scaleX: Math.cos(Math.PI * ep) };
+    }
+    if (tType === 'R') {
+      const ep = easeInOutCubic(p);
+      const x0 = baseX0 + manualX / 2;
+      return { type: 'R', x0, angleRad: Math.PI * ep, y: axisY() };
+    }
+    // Glide Reflection ('G')
+    let shiftX = 0;
+    let scaleY = 1;
+    if (p <= 0.5) {
+      const q1 = easeInOutCubic(p / 0.5);
+      shiftX = q1 * (L / 2 + manualX);
+    } else {
+      shiftX = L / 2 + manualX;
+      const q2 = easeInOutCubic((p - 0.5) / 0.5);
+      scaleY = Math.cos(Math.PI * q2);
+    }
+    return { type: 'G', totalShiftX: shiftX, scaleY, y: axisY() };
+  }
+
+  function drawMarkedSymmetries(ctx, cssW, cssH) {
+    const L = state.analyzer.period;
+    ctx.save();
+    state.analyzer.markedSymmetries.forEach((m) => {
+      if (m.type === 'V') {
+        ctx.strokeStyle = '#059669';
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.moveTo(m.x, 0);
+        ctx.lineTo(m.x, cssH);
+        ctx.stroke();
+
+        ctx.fillStyle = '#059669';
+        ctx.beginPath();
+        ctx.roundRect(m.x - 14, cssH - 24, 28, 18, 6);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('V', m.x, cssH - 11.5);
+      } else if (m.type === 'H') {
+        ctx.strokeStyle = '#059669';
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.moveTo(0, m.y);
+        ctx.lineTo(cssW, m.y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#059669';
+        ctx.beginPath();
+        ctx.roundRect(10, m.y - 11, 28, 20, 6);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('H', 24, m.y + 3);
+      } else if (m.type === 'R') {
+        ctx.strokeStyle = '#7c3aed';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, 14, 0, Math.PI * 1.5);
+        ctx.stroke();
+
+        ctx.fillStyle = '#7c3aed';
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y - 8);
+        ctx.lineTo(m.x + 8, m.y);
+        ctx.lineTo(m.x, m.y + 8);
+        ctx.lineTo(m.x - 8, m.y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.roundRect(m.x - 16, m.y + 16, 32, 17, 6);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('180\u00b0', m.x, m.y + 28);
+      } else if (m.type === 'G') {
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.moveTo(0, m.y);
+        ctx.lineTo(cssW, m.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const x1 = m.xStart;
+        const x2 = m.xStart + m.dx;
+        ctx.strokeStyle = '#b45309';
+        ctx.fillStyle = '#b45309';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x1, m.y);
+        ctx.lineTo(x2, m.y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x1, m.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        const dir = m.dx >= 0 ? 1 : -1;
+        ctx.beginPath();
+        ctx.moveTo(x2, m.y);
+        ctx.lineTo(x2 - dir * 12, m.y - 7);
+        ctx.lineTo(x2 - dir * 12, m.y + 7);
+        ctx.closePath();
+        ctx.fill();
+
+        const midX = (x1 + x2) / 2;
+        const lbl = `v = ${(m.dx / L).toFixed(2)} L` + (m.trueGlide === false ? ' (mirror + slide)' : '');
+        const bw = m.trueGlide === false ? 150 : 84;
+        ctx.beginPath();
+        ctx.roundRect(midX - bw / 2, m.y - 25, bw, 18, 6);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(lbl, midX, m.y - 12.5);
+      }
+    });
+    ctx.restore();
+  }
+
+  /* ==========================================================================
+     11. MARKING SYMMETRIES (SPACEBAR OR BUTTON)
+     ========================================================================== */
+  function markCurrentSymmetry() {
+    const a = state.analyzer;
+    if (a.sourceMode === 'photo' && a.calStep !== 'analyze') return;
+    if (!a.drawn) {
+      showToast('Draw a mirror line, rotation centre or glide vector on the pattern first, then test it.');
+      return;
+    }
+    const dpr = window.devicePixelRatio || 1;
+    const geom = computeActiveTransformGeometry(analyzerCanvas.width / dpr, 1);
+    const res = evaluateMatch(geom);
+    if (!res.works) {
+      showToast(`That doesn\u2019t map the pattern onto itself (${res.pct}% match), so it wasn\u2019t pinned. Adjust it and test again.`);
+      return;
+    }
+    if (geom.type === 'V') { a.markedSymmetries.push({ type: 'V', x: geom.x0 }); autoCheckSymmetry('V'); }
+    else if (geom.type === 'H') { a.markedSymmetries.push({ type: 'H', y: geom.y }); autoCheckSymmetry('H'); }
+    else if (geom.type === 'R') { a.markedSymmetries.push({ type: 'R', x: geom.x0, y: geom.y }); autoCheckSymmetry('R'); }
+    else if (geom.type === 'G') { {
+      const k = glideKind(geom);
+      a.markedSymmetries.push({ type: 'G', y: geom.y, xStart: a.vecX0, dx: geom.totalShiftX, trueGlide: k.trueGlide });
+      if (k.trueGlide) autoCheckSymmetry('G');
+      else showToast('That works, but it is not a true glide: the midline is a mirror and the slide is a translation. Use the Horizontal Mirror tool to pin the mirror itself.');
+    } }
+    else { a.markedSymmetries.push({ type: 'G', y: axisY(), xStart: a.vecX0, dx: geom.totalShiftX }); }
+    updateMarkedCountUI(); // also clears the drawn element, ready for the next one
+    renderAnalyzer();
+  }
+
+  function autoCheckSymmetry(symKey) {
+    state.analyzer.checklist[symKey] = true;
+    const groupEl = document.querySelector(`.yn-group[data-sym="${symKey}"]`);
+    if (groupEl) {
+      groupEl.querySelectorAll('.yn-btn').forEach((b) => {
+        b.classList.toggle('active', b.dataset.val === 'true');
+      });
+    }
+    updateClassifierUI();
+  }
+
+  function updateMarkedCountUI() {
+    document.getElementById('markedCountBadge').textContent = state.analyzer.markedSymmetries.length;
+    // Every pattern change / pin / undo / clear starts a fresh drawing
+    pauseAnimation();
+    clearDrawn();
+    syncScrubberUI();
+  }
+
+  document.getElementById('markSymmetryBtn').addEventListener('click', markCurrentSymmetry);
+
+  document.getElementById('showMarkedCheck').addEventListener('change', (e) => {
+    state.analyzer.showMarked = e.target.checked;
+    renderAnalyzer();
+  });
+
+  document.getElementById('undoMarkBtn').addEventListener('click', () => {
+    state.analyzer.markedSymmetries.pop();
+    updateMarkedCountUI();
+    renderAnalyzer();
+  });
+
+  document.getElementById('clearMarksBtn').addEventListener('click', () => {
+    state.analyzer.markedSymmetries = [];
+    updateMarkedCountUI();
+    renderAnalyzer();
+  });
+
+  document.getElementById('exportAnnotatedBtn').addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'frieze-symmetry-analysis.png';
+    link.href = analyzerCanvas.toDataURL('image/png');
+    link.click();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (document.getElementById('savePatternModalBackdrop').classList.contains('visible')) {
+      if (e.code === 'Escape') closeSaveModal();
+      return;
+    }
+    if (state.activeTab !== 'analyzer') return;
+    const tag = document.activeElement ? document.activeElement.tagName : '';
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+    if (e.code === 'Space') {
+      e.preventDefault();
+      markCurrentSymmetry();
+    } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      if (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep !== 'analyze') return;
+      e.preventDefault();
+      if (!state.analyzer.drawn) return;
+      pauseAnimation();
+      state.analyzer.progress = 1;
+      syncScrubberUI();
+      const step = e.shiftKey ? 0.5 : 2;
+      state.analyzer.manualOffsetX += e.code === 'ArrowRight' ? step : -step;
+      renderAnalyzer();
+    }
+  });
+
+  /* ==========================================================================
+     12. ANALYZER POINTER DRAGGING (CALIBRATION + MAGNETIC OVERLAY DRAG)
+     ========================================================================== */
+  function drawSymmetryElement(px, py, start) {
+    const a = state.analyzer, L = a.period, t = a.transform;
+    a.drawn = true; a.showOverlay = false; a.progress = 1; a.baseAxisFrac = 0;
+    const yy = (a.magneticSnap && Math.abs(py - a.yMid) <= 10) ? a.yMid : py;
+    if (t === 'V') a.manualOffsetX = 2 * px;
+    else if (t === 'H') a.drawnY = yy;
+    else if (t === 'R') { a.manualOffsetX = 2 * px; a.drawnY = yy; }
+    else {
+      if (start) { a.vecX0 = px; a.drawnY = yy; }
+      a.manualOffsetX = (px - a.vecX0) - (t === 'G' ? L / 2 : L);
+    }
+    syncScrubberUI();
+    renderAnalyzer();
+  }
+
+  analyzerCanvas.addEventListener('pointerdown', (e) => {
+    const rect = analyzerCanvas.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = analyzerCanvas.width / dpr;
+
+    pauseAnimation();
+
+    if (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep !== 'analyze') {
+      if (state.analyzer.calStep === 'straighten' && state.analyzer.twoPointMode) {
+        state.analyzer.levelPoints.push({ x: px, y: py });
+        if (state.analyzer.levelPoints.length === 2) {
+          const [p1, p2] = state.analyzer.levelPoints;
+          const angleRad = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+          let deg = -(angleRad * 180) / Math.PI;
+          if (deg > 90) deg -= 180;
+          if (deg < -90) deg += 180;
+          state.analyzer.twoPointMode = false;
+          state.analyzer.levelPoints = [];
+          document.getElementById('twoPointLevelBtn').classList.remove('active-pill');
+          document.getElementById('analyzerStage').classList.remove('crosshair');
+          updateStraightenAngle(state.analyzer.straightenDeg + deg);
+        } else {
+          renderAnalyzer();
+        }
+        return;
+      }
+
+      if (state.analyzer.calStep === 'midline') {
+        state.analyzer.dragTarget = 'midline';
+        state.analyzer.dragStartY = py;
+        state.analyzer.dragInitialVal = state.analyzer.yMid;
+        analyzerCanvas.setPointerCapture(e.pointerId);
+      } else if (state.analyzer.calStep === 'period') {
+        state.analyzer.dragTarget = 'period';
+        state.analyzer.dragStartX = px;
+        state.analyzer.dragInitialVal = state.analyzer.calPeriodDragX;
+        analyzerCanvas.setPointerCapture(e.pointerId);
+      }
+      return;
+    }
+
+    state.analyzer.dragTarget = 'draw';
+    analyzerCanvas.setPointerCapture(e.pointerId);
+    drawSymmetryElement(px, py, true);
+  });
+
+  analyzerCanvas.addEventListener('pointermove', (e) => {
+    if (!state.analyzer.dragTarget) return;
+    const rect = analyzerCanvas.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    const dpr = window.devicePixelRatio || 1;
+    const cssH = analyzerCanvas.height / dpr;
+
+    if (state.analyzer.dragTarget === 'midline') {
+      const dy = py - state.analyzer.dragStartY;
+      state.analyzer.yMid = Math.max(20, Math.min(cssH - 20, state.analyzer.dragInitialVal + dy / 2));
+      renderAnalyzer();
+    } else if (state.analyzer.dragTarget === 'period') {
+      const dx = px - state.analyzer.dragStartX;
+      state.analyzer.calPeriodDragX = state.analyzer.dragInitialVal + dx;
+      document.getElementById('calPeriodReadout').textContent = Math.max(20, Math.round(Math.abs(state.analyzer.calPeriodDragX)));
+      renderAnalyzer();
+    } else if (state.analyzer.dragTarget === 'draw') {
+      drawSymmetryElement(px, py, false);
+    }
+  });
+
+  function releaseAnalyzerPointer(e) {
+    if (state.analyzer.dragTarget) {
+      state.analyzer.dragTarget = null;
+      try { analyzerCanvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    }
+  }
+  analyzerCanvas.addEventListener('pointerup', releaseAnalyzerPointer);
+  analyzerCanvas.addEventListener('pointercancel', releaseAnalyzerPointer);
+
+  /* ==========================================================================
+     13. PHOTO UPLOAD & 3-STEP GUIDED CALIBRATION WIZARD CONTROLS
+     ========================================================================== */
+  function setCalibrationStep(stepName) {
+    state.analyzer.calStep = stepName;
+    state.analyzer.twoPointMode = false;
+    state.analyzer.levelPoints = [];
+    document.getElementById('twoPointLevelBtn').classList.remove('active-pill');
+    document.getElementById('analyzerStage').classList.remove('crosshair');
+
+    const order = ['straighten', 'midline', 'period', 'analyze'];
+    const idx = order.indexOf(stepName);
+
+    document.querySelectorAll('.w-step').forEach((btn) => {
+      const bIdx = order.indexOf(btn.dataset.calstep);
+      btn.classList.toggle('active', bIdx === idx);
+      btn.classList.toggle('done', bIdx < idx);
+    });
+
+    document.getElementById('calStepStraighten').style.display = stepName === 'straighten' ? 'flex' : 'none';
+    document.getElementById('calStepMidline').style.display = stepName === 'midline' ? 'flex' : 'none';
+    document.getElementById('calStepPeriod').style.display = stepName === 'period' ? 'flex' : 'none';
+    document.getElementById('calStepAnalyze').style.display = stepName === 'analyze' ? 'flex' : 'none';
+
+    const inAnalysis = stepName === 'analyze';
+    document.getElementById('transformSelectorSection').style.display = inAnalysis ? 'block' : 'none';
+    document.getElementById('analyzerPlaybackBar').style.display = inAnalysis ? 'flex' : 'none';
+    document.getElementById('markSymmetryToolbar').style.display = inAnalysis ? 'flex' : 'none';
+    document.getElementById('analyzerAxisHint').style.display = inAnalysis ? 'flex' : 'none';
+
+    if (inAnalysis) {
+      document.getElementById('lockedMidlineVal').textContent = Math.round(state.analyzer.yMid);
+      document.getElementById('lockedPeriodVal').textContent = Math.round(state.analyzer.period);
+      rebuildAnalyzerBuffers();
+    }
+    renderAnalyzer();
+  }
+
+  document.querySelectorAll('.w-step').forEach((btn) => {
+    btn.addEventListener('click', () => setCalibrationStep(btn.dataset.calstep));
+  });
+
+  function loadAnalyzerPhotoFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const dpr = window.devicePixelRatio || 1;
+        const cssH = analyzerCanvas.height / dpr;
+
+        state.analyzer.rawPhotoImg = img;
+        state.analyzer.sourceMode = 'photo';
+        state.analyzer.isMystery = false;
+        state.analyzer.straightenDeg = 0;
+        state.analyzer.yMid = cssH / 2;
+        state.analyzer.calPeriodDragX = 140;
+        state.analyzer.period = 140;
+        state.analyzer.manualOffsetX = 0;
+        state.analyzer.progress = 0;
+        state.analyzer.markedSymmetries = [];
+        state.analyzer.extendBothSides = true;
+
+        document.getElementById('photoExtendToggle').checked = true;
+        document.getElementById('straightenAngleSlider').value = 0;
+        document.getElementById('straightenAngleVal').textContent = '0.0\u00b0';
+        document.getElementById('calPeriodReadout').textContent = '140';
+        document.getElementById('photoCalibrationWizard').classList.add('visible');
+
+        resetChecklist();
+        updateMarkedCountUI();
+        syncScrubberUI();
+        updateAnalyzerBadge();
+        rebuildStraightenedPhoto();
+        rebuildAnalyzerBuffers();
+        setCalibrationStep('straighten');
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('friezePhotoUpload').addEventListener('change', (e) => {
+    loadAnalyzerPhotoFile(e.target.files[0]);
+  });
+
+  document.getElementById('analyzerStage').addEventListener('dragover', (e) => e.preventDefault());
+  document.getElementById('analyzerStage').addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      loadAnalyzerPhotoFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  function updateStraightenAngle(deg) {
+    state.analyzer.straightenDeg = Math.max(-20, Math.min(20, parseFloat(deg.toFixed(1))));
+    document.getElementById('straightenAngleSlider').value = state.analyzer.straightenDeg;
+    document.getElementById('straightenAngleVal').textContent = state.analyzer.straightenDeg.toFixed(1) + '\u00b0';
+    rebuildStraightenedPhoto();
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  }
+
+  document.getElementById('straightenAngleSlider').addEventListener('input', (e) => {
+    updateStraightenAngle(parseFloat(e.target.value));
+  });
+  document.getElementById('straightenMinusBtn').addEventListener('click', () => {
+    updateStraightenAngle(state.analyzer.straightenDeg - 0.2);
+  });
+  document.getElementById('straightenPlusBtn').addEventListener('click', () => {
+    updateStraightenAngle(state.analyzer.straightenDeg + 0.2);
+  });
+  document.getElementById('straightenResetBtn').addEventListener('click', () => {
+    updateStraightenAngle(0);
+  });
+  document.getElementById('twoPointLevelBtn').addEventListener('click', () => {
+    state.analyzer.twoPointMode = !state.analyzer.twoPointMode;
+    state.analyzer.levelPoints = [];
+    document.getElementById('twoPointLevelBtn').classList.toggle('active-pill', state.analyzer.twoPointMode);
+    document.getElementById('analyzerStage').classList.toggle('crosshair', state.analyzer.twoPointMode);
+    renderAnalyzer();
+  });
+
+  document.getElementById('toMidlineStepBtn').addEventListener('click', () => {
+    rebuildStraightenedPhoto();
+    setCalibrationStep('midline');
+  });
+
+  document.getElementById('midlineUpBtn').addEventListener('click', () => {
+    state.analyzer.yMid -= 1;
+    renderAnalyzer();
+  });
+  document.getElementById('midlineDownBtn').addEventListener('click', () => {
+    state.analyzer.yMid += 1;
+    renderAnalyzer();
+  });
+  document.getElementById('midlineCenterBtn').addEventListener('click', () => {
+    const dpr = window.devicePixelRatio || 1;
+    state.analyzer.yMid = ANALYZER_H / 2;
+    renderAnalyzer();
+  });
+
+  document.getElementById('toPeriodStepBtn').addEventListener('click', () => {
+    setCalibrationStep('period');
+  });
+
+  document.getElementById('periodLeftBtn').addEventListener('click', () => {
+    state.analyzer.calPeriodDragX -= 1;
+    document.getElementById('calPeriodReadout').textContent = Math.max(20, Math.round(Math.abs(state.analyzer.calPeriodDragX)));
+    renderAnalyzer();
+  });
+  document.getElementById('periodRightBtn').addEventListener('click', () => {
+    state.analyzer.calPeriodDragX += 1;
+    document.getElementById('calPeriodReadout').textContent = Math.max(20, Math.round(Math.abs(state.analyzer.calPeriodDragX)));
+    renderAnalyzer();
+  });
+  document.getElementById('periodHalveBtn').addEventListener('click', () => {
+    state.analyzer.calPeriodDragX = state.analyzer.calPeriodDragX / 2;
+    document.getElementById('calPeriodReadout').textContent = Math.max(20, Math.round(Math.abs(state.analyzer.calPeriodDragX)));
+    renderAnalyzer();
+  });
+
+  document.getElementById('toAnalyzeStepBtn').addEventListener('click', () => {
+    state.analyzer.period = Math.max(20, Math.round(Math.abs(state.analyzer.calPeriodDragX)));
+    state.analyzer.manualOffsetX = 0;
+    state.analyzer.progress = 0;
+    state.analyzer.extendBothSides = true;
+    document.getElementById('photoExtendToggle').checked = true;
+    syncScrubberUI();
+    setCalibrationStep('analyze');
+  });
+
+  document.getElementById('photoExtendToggle').addEventListener('change', (e) => {
+    state.analyzer.extendBothSides = e.target.checked;
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  });
+
+  document.getElementById('recalibrateBtn').addEventListener('click', () => {
+    setCalibrationStep('straighten');
+  });
+
+  document.getElementById('clearPhotoBtn').addEventListener('click', () => {
+    const dpr = window.devicePixelRatio || 1;
+    state.analyzer.sourceMode = 'builtin';
+    state.analyzer.period = 170;
+    state.analyzer.yMid = ANALYZER_H / 2;
+    state.analyzer.manualOffsetX = 0;
+    state.analyzer.markedSymmetries = [];
+    document.getElementById('photoCalibrationWizard').classList.remove('visible');
+    document.getElementById('friezePhotoUpload').value = '';
+    document.getElementById('patternSourceSelect').value = state.analyzer.builtinGroup;
+    setCalibrationStep('analyze');
+    updateMarkedCountUI();
+    updateAnalyzerBadge();
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  });
+
+  /* ==========================================================================
+     14. SAVING & LOADING USER PATTERNS IN LOCAL STORAGE
+     ========================================================================== */
+  let toastTimer = null;
+  function showToast(msg, actionLabel, onAction) {
+    const banner = document.getElementById('toastBanner');
+    const msgEl = document.getElementById('toastMessage');
+    const btnEl = document.getElementById('toastActionBtn');
+
+    msgEl.textContent = msg;
+    if (actionLabel && onAction) {
+      btnEl.style.display = 'inline-flex';
+      btnEl.textContent = actionLabel;
+      btnEl.onclick = () => {
+        banner.classList.remove('visible');
+        onAction();
+      };
+    } else {
+      btnEl.style.display = 'none';
+      btnEl.onclick = null;
+    }
+
+    banner.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      banner.classList.remove('visible');
+    }, 4500);
+  }
+
+  function openSaveModal(defaultName, factoryFn) {
+    state.pendingSaveFactory = factoryFn;
+    const input = document.getElementById('savePatternNameInput');
+    input.value = defaultName;
+    document.getElementById('savePatternModalBackdrop').classList.add('visible');
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 30);
+  }
+
+  function closeSaveModal() {
+    document.getElementById('savePatternModalBackdrop').classList.remove('visible');
+    state.pendingSaveFactory = null;
+  }
+
+  document.getElementById('cancelSaveModalBtn').addEventListener('click', closeSaveModal);
+  document.getElementById('savePatternModalBackdrop').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeSaveModal();
+  });
+
+  document.getElementById('savePatternNameInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('confirmSaveModalBtn').click();
+    }
+  });
+
+  document.getElementById('confirmSaveModalBtn').addEventListener('click', () => {
+    if (!state.pendingSaveFactory) return;
+    const rawName = document.getElementById('savePatternNameInput').value.trim();
+    const name = rawName || `My Pattern ${state.savedPatterns.length + 1}`;
+    const entry = state.pendingSaveFactory(name);
+    if (!entry) return;
+
+    state.savedPatterns.unshift(entry);
+    if (saveSavedPatternsToStorage(state.savedPatterns)) {
+      refreshSavedPatternsUI();
+      showToast(`\u2705 Saved "${name}" to My Patterns!`);
+    }
+    closeSaveModal();
+  });
+
+  // Save from Tab 1 (Adaptive Motif Frieze Generator)
+  document.getElementById('qSavePatternBtn').addEventListener('click', () => {
+    const gCode = state.quarter.group;
+    const gObj = FRIEZE_GROUPS[gCode];
+    openSaveModal(`My ${gCode} (${gObj.name})`, (name) => {
+      const tileH = 220;
+      const { periodL } = getAdaptiveTileMetrics(tileH, gCode);
+
+      // Render 1 exact repeating tile (periodL x tileH)
+      const tileCvs = document.createElement('canvas');
+      tileCvs.width = periodL;
+      tileCvs.height = tileH;
+      const tCtx = tileCvs.getContext('2d');
+      tCtx.fillStyle = '#ffffff';
+      tCtx.fillRect(0, 0, periodL, tileH);
+      renderAdaptiveFriezeStrip(tCtx, 0, periodL, tileH, gCode, false, null);
+
+      // Render wide strip preview for the library card
+      const prevCvs = document.createElement('canvas');
+      prevCvs.width = 360;
+      prevCvs.height = 90;
+      const pCtx = prevCvs.getContext('2d');
+      pCtx.fillStyle = '#ffffff';
+      pCtx.fillRect(0, 0, 360, 90);
+      renderAdaptiveFriezeStrip(pCtx, 0, 360, 90, gCode, false, null);
+
+      return {
+        id: 'saved_' + Date.now(),
+        name,
+        group: gCode,
+        period: periodL,
+        yMidRatio: 0.5,
+        tileDataUrl: tileCvs.toDataURL('image/png'),
+        previewDataUrl: prevCvs.toDataURL('image/png'),
+        createdAt: Date.now()
+      };
+    });
+  });
+
+  // Save from Tab 2 (Calibrated Uploaded Photo)
+  document.getElementById('saveCalibratedPhotoBtn').addEventListener('click', () => {
+    if (!state.analyzer.rawPhotoImg) return;
+    openSaveModal(`Calibrated Photo ${state.savedPatterns.length + 1}`, (name) => {
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = analyzerCanvas.width / dpr;
+      const cssH = analyzerCanvas.height / dpr;
+      const L = state.analyzer.period;
+
+      // Make sure photoTileLeft/Width are up to date
+      const tmpCvs = document.createElement('canvas');
+      tmpCvs.width = L;
+      tmpCvs.height = cssH;
+      const tCtx = tmpCvs.getContext('2d');
+      tCtx.fillStyle = '#ffffff';
+      tCtx.fillRect(0, 0, L, cssH);
+      tCtx.drawImage(
+        straightenedPhotoCanvas,
+        state.analyzer.photoTileLeft * dpr, 0, state.analyzer.photoTileWidth * dpr, cssH * dpr,
+        0, 0, L, cssH
+      );
+
+      const prevCvs = document.createElement('canvas');
+      prevCvs.width = 360;
+      prevCvs.height = 90;
+      const pCtx = prevCvs.getContext('2d');
+      pCtx.fillStyle = '#ffffff';
+      pCtx.fillRect(0, 0, 360, 90);
+      const repW = (L / cssH) * 90;
+      for (let x = 0; x < 360; x += repW) {
+        pCtx.drawImage(tmpCvs, x, 0, repW, 90);
+      }
+
+      return {
+        id: 'saved_' + Date.now(),
+        name,
+        group: 'photo',
+        period: L,
+        yMidRatio: state.analyzer.yMid / cssH,
+        tileDataUrl: tmpCvs.toDataURL('image/jpeg', 0.88),
+        previewDataUrl: prevCvs.toDataURL('image/jpeg', 0.82),
+        createdAt: Date.now()
+      };
+    });
+  });
+
+  // Save from Tab 3 (Freehand Sketchpad)
+  document.getElementById('saveSketchpadPatternBtn').addEventListener('click', () => {
+    if (state.creator.strokes.length === 0) {
+      showToast('Draw a pattern on the sketchpad first before saving!');
+      return;
+    }
+    const gCode = state.creator.group;
+    const gObj = FRIEZE_GROUPS[gCode];
+    openSaveModal(`Sketchpad ${gCode} (${gObj.name})`, (name) => {
+      const tileH = 220;
+      const L = state.creator.period;
+
+      const tileCvs = document.createElement('canvas');
+      tileCvs.width = L;
+      tileCvs.height = tileH;
+      const tCtx = tileCvs.getContext('2d');
+      tCtx.fillStyle = '#ffffff';
+      tCtx.fillRect(0, 0, L, tileH);
+      renderFriezeStrip(tCtx, 0, L, tileH, L, gCode, null, null, state.creator.strokes);
+
+      const prevCvs = document.createElement('canvas');
+      prevCvs.width = 360;
+      prevCvs.height = 90;
+      const pCtx = prevCvs.getContext('2d');
+      pCtx.fillStyle = '#ffffff';
+      pCtx.fillRect(0, 0, 360, 90);
+      renderFriezeStrip(pCtx, 0, 360, 90, 90, gCode, null, null, state.creator.strokes);
+
+      return {
+        id: 'saved_' + Date.now(),
+        name,
+        group: gCode,
+        period: L,
+        yMidRatio: 0.5,
+        tileDataUrl: tileCvs.toDataURL('image/png'),
+        previewDataUrl: prevCvs.toDataURL('image/png'),
+        createdAt: Date.now()
+      };
+    });
+  });
+
+  function loadSavedPatternIntoAnalyzer(savedEntry) {
+    if (!savedEntry) return;
+    const img = new Image();
+    img.onload = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const cssH = ANALYZER_H;
+
+      state.activeSavedPattern = {
+        ...savedEntry,
+        tileImg: img
+      };
+      state.analyzer.sourceMode = 'saved';
+      state.analyzer.isMystery = false;
+      state.analyzer.period = savedEntry.period || 170;
+      state.analyzer.yMid = (savedEntry.yMidRatio || 0.5) * cssH;
+      state.analyzer.manualOffsetX = 0;
+      state.analyzer.progress = 0;
+      state.analyzer.markedSymmetries = [];
+      state.analyzer.isSnapped = false;
+
+      document.getElementById('photoCalibrationWizard').classList.remove('visible');
+      document.getElementById('patternSourceSelect').value = savedEntry.id;
+      setCalibrationStep('analyze');
+      resetChecklist();
+      updateMarkedCountUI();
+      syncScrubberUI();
+      updateAnalyzerBadge();
+      switchTab('analyzer');
+      rebuildAnalyzerBuffers();
+      renderAnalyzer();
+    };
+    img.src = savedEntry.tileDataUrl;
+  }
+
+  function deleteSavedPattern(id) {
+    const idx = state.savedPatterns.findIndex((p) => p.id === id);
+    if (idx === -1) return;
+    const removed = state.savedPatterns[idx];
+    state.lastDeletedPattern = { item: removed, index: idx };
+    state.savedPatterns.splice(idx, 1);
+    saveSavedPatternsToStorage(state.savedPatterns);
+    refreshSavedPatternsUI();
+
+    if (state.analyzer.sourceMode === 'saved' && state.activeSavedPattern && state.activeSavedPattern.id === id) {
+      document.getElementById('patternSourceSelect').value = 'p11g';
+      document.getElementById('patternSourceSelect').dispatchEvent(new Event('change'));
+    }
+
+    showToast(`Deleted "${removed.name}".`, 'Undo', () => {
+      if (!state.lastDeletedPattern) return;
+      state.savedPatterns.splice(state.lastDeletedPattern.index, 0, state.lastDeletedPattern.item);
+      saveSavedPatternsToStorage(state.savedPatterns);
+      refreshSavedPatternsUI();
+      state.lastDeletedPattern = null;
+    });
+  }
+
+  function refreshSavedPatternsUI() {
+    const list = state.savedPatterns;
+    document.getElementById('savedPatternsCountLabel').textContent = list.length;
+
+    // 1. Update <optgroup label="My Saved Patterns (Local Storage)"> in Analyser select
+    const optgroup = document.getElementById('savedPatternsOptgroup');
+    optgroup.innerHTML = '';
+    if (list.length === 0) {
+      const emptyOpt = document.createElement('option');
+      emptyOpt.disabled = true;
+      emptyOpt.textContent = '(No saved patterns yet — save from Tab 1, 2, or 3)';
+      optgroup.appendChild(emptyOpt);
+    } else {
+      list.forEach((p) => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        const tag = p.group === 'photo' ? 'Photo' : p.group;
+        opt.textContent = `\u2605 ${p.name} [${tag}]`;
+        optgroup.appendChild(opt);
+      });
+    }
+
+    // 2. Update Saved Patterns Drawer Grid
+    const grid = document.getElementById('savedPatternsGrid');
+    grid.innerHTML = '';
+    if (list.length === 0) {
+      grid.innerHTML = '<div style="font-size:0.83rem; color:var(--text-muted); padding:0.4rem 0;">No patterns saved yet. Use <strong>"Save to My Patterns"</strong> in the Frieze Generator, Photo Analyser, or Sketchpad to add patterns here.</div>';
+      return;
+    }
+
+    list.forEach((p) => {
+      const card = document.createElement('div');
+      card.className = 'saved-card';
+      const badgeLabel = p.group === 'photo' ? 'Calibrated Photo' : `${p.group} (${FRIEZE_GROUPS[p.group]?.name || ''})`;
+      card.innerHTML = `
+        <img src="${p.previewDataUrl}" alt="${p.name}" />
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.35rem;">
+          <strong style="font-size:0.83rem; color:#0f172a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</strong>
+          <span class="badge purple" style="font-size:0.7rem; padding:0.12rem 0.45rem;">${badgeLabel}</span>
+        </div>
+        <div style="display:flex; gap:0.4rem; margin-top:auto;">
+          <button class="btn primary sm" style="flex:1;" data-loadid="${p.id}">Load &amp; Analyse</button>
+          <button class="btn sm" data-delid="${p.id}" title="Delete from local storage">&#128465;</button>
+        </div>
+      `;
+      card.querySelector('[data-loadid]').addEventListener('click', () => {
+        loadSavedPatternIntoAnalyzer(p);
+      });
+      card.querySelector('[data-delid]').addEventListener('click', () => {
+        deleteSavedPattern(p.id);
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById('toggleSavedDrawerBtn').addEventListener('click', () => {
+    document.getElementById('savedLibraryDrawer').classList.toggle('visible');
+  });
+
+  document.getElementById('closeSavedDrawerBtn').addEventListener('click', () => {
+    document.getElementById('savedLibraryDrawer').classList.remove('visible');
+  });
+
+  /* ==========================================================================
+     15. ANALYZER PLAYBACK, SCRUBBER & BUILT-IN / SAVED PATTERN SELECTION
+     ========================================================================== */
+  function startAnimation() {
+    if (state.analyzer.progress >= 0.999) {
+      state.analyzer.progress = 0;
+    }
+    if (!state.analyzer.drawn) {
+      showToast('Draw your symmetry on the pattern first, then press Test it.');
+      return;
+    }
+    state.analyzer.showOverlay = true;
+    state.analyzer.isPlaying = true;
+    state.analyzer.lastTimestamp = performance.now();
+    document.getElementById('playAnimBtn').textContent = '\u23f8 Pause';
+
+    function step(now) {
+      if (!state.analyzer.isPlaying) return;
+      const dt = (now - state.analyzer.lastTimestamp) / 1000;
+      state.analyzer.lastTimestamp = now;
+
+      const duration = state.analyzer.transform === 'G' ? 1.7 : 1.25;
+      state.analyzer.progress = Math.min(1, state.analyzer.progress + dt / duration);
+      syncScrubberUI();
+      renderAnalyzer();
+
+      if (state.analyzer.progress >= 1) {
+        state.analyzer.isPlaying = false;
+        document.getElementById('playAnimBtn').textContent = '\u25b6 Test it';
+      } else {
+        state.analyzer.animRaf = requestAnimationFrame(step);
+      }
+    }
+
+    cancelAnimationFrame(state.analyzer.animRaf);
+    state.analyzer.animRaf = requestAnimationFrame(step);
+  }
+
+  function pauseAnimation() {
+    state.analyzer.isPlaying = false;
+    cancelAnimationFrame(state.analyzer.animRaf);
+    document.getElementById('playAnimBtn').textContent = '\u25b6 Test it';
+  }
+
+  function syncScrubberUI() {
+    const pct = Math.round(state.analyzer.progress * 100);
+    document.getElementById('animScrubber').value = pct;
+    document.getElementById('animPctLabel').textContent = pct + '%';
+  }
+
+  document.getElementById('playAnimBtn').addEventListener('click', () => {
+    if (state.analyzer.isPlaying) pauseAnimation();
+    else startAnimation();
+  });
+
+  document.getElementById('resetAnimBtn').addEventListener('click', () => {
+    pauseAnimation();
+    clearDrawn();
+    syncScrubberUI();
+    renderAnalyzer();
+  });
+
+  document.getElementById('snapEndBtn').addEventListener('click', () => {
+    pauseAnimation();
+    state.analyzer.progress = 1;
+    state.analyzer.showOverlay = state.analyzer.drawn;
+    syncScrubberUI();
+    renderAnalyzer();
+  });
+
+  document.getElementById('animScrubber').addEventListener('input', (e) => {
+    pauseAnimation();
+    state.analyzer.progress = parseInt(e.target.value, 10) / 100;
+    state.analyzer.showOverlay = state.analyzer.drawn;
+    syncScrubberUI();
+    renderAnalyzer();
+  });
+
+  document.getElementById('magneticSnapCheck').addEventListener('change', (e) => {
+    state.analyzer.magneticSnap = e.target.checked;
+    renderAnalyzer();
+  });
+
+  document.getElementById('tintOverlayCheck').addEventListener('change', (e) => {
+    state.analyzer.tintOverlay = e.target.checked;
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  });
+
+  document.getElementById('overlayOpacitySlider').addEventListener('input', (e) => {
+    state.analyzer.overlayOpacity = parseInt(e.target.value, 10) / 100;
+    renderAnalyzer();
+  });
+
+  document.querySelectorAll('.transform-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.transform-card').forEach((c) => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.analyzer.transform = card.dataset.transform;
+      pauseAnimation();
+      clearDrawn();
+      syncScrubberUI();
+      renderAnalyzer();
+    });
+  });
+
+  document.querySelectorAll('.snap-axis').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.analyzer.baseAxisFrac = parseFloat(btn.dataset.frac);
+      state.analyzer.manualOffsetX = 0;
+      state.analyzer.progress = 1;
+      syncScrubberUI();
+      renderAnalyzer();
+    });
+  });
+
+  document.getElementById('nudgeCopyLeftBtn').addEventListener('click', () => {
+    if (state.analyzer.progress < 0.05) state.analyzer.progress = 1;
+    state.analyzer.manualOffsetX -= 2;
+    syncScrubberUI();
+    renderAnalyzer();
+  });
+
+  document.getElementById('nudgeCopyRightBtn').addEventListener('click', () => {
+    if (state.analyzer.progress < 0.05) state.analyzer.progress = 1;
+    state.analyzer.manualOffsetX += 2;
+    syncScrubberUI();
+    renderAnalyzer();
+  });
+
+  function updateAnalyzerBadge() {
+    const badge = document.getElementById('analyzerPatternBadge');
+    if (state.analyzer.sourceMode === 'photo') {
+      badge.className = 'badge success';
+      badge.textContent = 'Uploaded Frieze Photo (Extended)';
+    } else if (state.analyzer.sourceMode === 'saved' && state.activeSavedPattern) {
+      badge.className = 'badge purple';
+      badge.textContent = `Saved: ${state.activeSavedPattern.name}`;
+    } else if (state.analyzer.sourceMode === 'quarter') {
+      const g = FRIEZE_GROUPS[state.quarter.group];
+      badge.className = 'badge';
+      badge.textContent = `Generator Frieze: ${g.code} (${g.name})`;
+    } else if (state.analyzer.sourceMode === 'custom') {
+      badge.className = 'badge';
+      badge.textContent = 'Sketchpad Pattern';
+    } else if (state.analyzer.isMystery) {
+      badge.className = 'badge mystery';
+      badge.textContent = 'Mystery Pattern (Unlabelled)';
+    } else {
+      const g = FRIEZE_GROUPS[state.analyzer.builtinGroup];
+      badge.className = 'badge';
+      badge.textContent = `Built-in: ${g.code} (${g.name})`;
+    }
+  }
+
+  function loadRandomMystery() {
+    const dpr = window.devicePixelRatio || 1;
+    const codes = Object.keys(FRIEZE_GROUPS);
+    let pick = codes[Math.floor(Math.random() * codes.length)];
+    if (pick === state.analyzer.mysteryGroup && codes.length > 1) {
+      pick = codes[(codes.indexOf(pick) + 1) % codes.length];
+    }
+    state.analyzer.sourceMode = 'builtin';
+    state.analyzer.isMystery = true;
+    state.analyzer.mysteryGroup = pick;
+    state.analyzer.period = 170;
+    state.analyzer.yMid = ANALYZER_H / 2;
+    state.analyzer.manualOffsetX = 0;
+    state.analyzer.progress = 0;
+    state.analyzer.markedSymmetries = [];
+    state.lab.solvedCurrent = false;
+    document.getElementById('patternSourceSelect').value = 'mystery';
+    document.getElementById('photoCalibrationWizard').classList.remove('visible');
+    setCalibrationStep('analyze');
+    resetChecklist();
+    updateMarkedCountUI();
+    syncScrubberUI();
+    updateAnalyzerBadge();
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  }
+
+  document.getElementById('patternSourceSelect').addEventListener('change', (e) => {
+    const val = e.target.value;
+    if (val.startsWith('saved_')) {
+      const found = state.savedPatterns.find((p) => p.id === val);
+      if (found) loadSavedPatternIntoAnalyzer(found);
+      return;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    state.analyzer.sourceMode = 'builtin';
+    state.analyzer.period = 170;
+    state.analyzer.yMid = ANALYZER_H / 2;
+    state.analyzer.manualOffsetX = 0;
+    state.analyzer.progress = 0;
+    state.analyzer.markedSymmetries = [];
+    document.getElementById('photoCalibrationWizard').classList.remove('visible');
+    setCalibrationStep('analyze');
+
+    if (val === 'mystery') {
+      loadRandomMystery();
+      return;
+    }
+    state.analyzer.isMystery = false;
+    state.analyzer.builtinGroup = val;
+    resetChecklist();
+    updateMarkedCountUI();
+    syncScrubberUI();
+    updateAnalyzerBadge();
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  });
+
+  document.getElementById('motifStyleSelect').addEventListener('change', (e) => {
+    state.analyzer.motifStyle = e.target.value;
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  });
+
+  document.getElementById('newMysteryBtn').addEventListener('click', loadRandomMystery);
+
+  /* ==========================================================================
+     16. CHECKLIST & LIVE CLASSIFIER
+     ========================================================================== */
+  function resetChecklist() {
+    state.analyzer.checklist = { H: null, V: null, R: null, G: null };
+    document.querySelectorAll('.yn-btn').forEach((b) => b.classList.remove('active'));
+    updateClassifierUI();
+  }
+
+  document.getElementById('resetChecklistBtn').addEventListener('click', resetChecklist);
+
+  document.querySelectorAll('.yn-group').forEach((group) => {
+    const sym = group.dataset.sym;
+    group.querySelectorAll('.yn-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.yn-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.analyzer.checklist[sym] = btn.dataset.val === 'true';
+        updateClassifierUI();
+      });
+    });
+  });
+
+  function updateClassifierUI() {
+    const box = document.getElementById('classifierResult');
+    const c = state.analyzer.checklist;
+    const candidates = Object.values(FRIEZE_GROUPS).filter((g) => {
+      for (const k of ['H', 'V', 'R', 'G']) {
+        if (c[k] !== null && g.symmetries[k] !== c[k]) return false;
+      }
+      return true;
+    });
+
+    if (candidates.length === 7) {
+      box.className = 'deduction-box';
+      box.innerHTML = 'Mark <strong>Yes</strong> or <strong>No</strong> in the table on the left (or press <kbd>Space</kbd> when a symmetry aligns) to classify the pattern.';
+      return;
+    }
+
+    if (candidates.length === 0) {
+      box.className = 'deduction-box invalid';
+      box.innerHTML =
+        '<strong>Impossible Combination!</strong> No Frieze group has that exact set of symmetries. ' +
+        'Remember to drag the flipped/rotated copy sideways across the full repeat period <em>L</em> when checking <strong>V</strong> and <strong>R</strong>.';
+      return;
+    }
+
+    if (candidates.length === 1) {
+      const match = candidates[0];
+      box.className = 'deduction-box match';
+      box.innerHTML =
+        `<strong>Exact Match: Group <code>${match.code}</code> (${match.name})!</strong><br>` +
+        `Symmetries: <em>${match.desc}</em>.`;
+      return;
+    }
+
+    const listStr = candidates.map((g) => `<code>${g.code}</code> (${g.name})`).join(', ');
+    box.className = 'deduction-box';
+    box.innerHTML =
+      `<strong>${candidates.length} Possible Groups Remaining:</strong> ${listStr}.<br>` +
+      `<span style="font-size:0.81rem;">Test the remaining transformations to narrow it down to 1 group.</span>`;
+  }
+
+  /* ==========================================================================
+     17. TAB 1: ADAPTIVE FRIEZE GENERATOR EVENTS (ACTIVITY 1)
+     ========================================================================== */
+  function loadLetterFMotif() {
+    state.quarter.sourceType = 'draw';
+    document.getElementById('quarterPhotoUpload').value = '';
+    document.getElementById('quarterPhotoControls').style.display = 'none';
+    document.getElementById('quarterDrawTools').style.display = 'block';
+    state.quarter.strokes = [
+      // Vertical stem of F
+      {
+        color: '#1e3a8a',
+        size: 11,
+        points: [
+          { x: 0.30, y: 0.85 },
+          { x: 0.30, y: 0.16 }
+        ]
+      },
+      // Top horizontal bar of F
+      {
+        color: '#1e3a8a',
+        size: 11,
+        points: [
+          { x: 0.30, y: 0.16 },
+          { x: 0.76, y: 0.16 }
+        ]
+      },
+      // Middle horizontal bar of F
+      {
+        color: '#be123c',
+        size: 10,
+        points: [
+          { x: 0.30, y: 0.48 },
+          { x: 0.64, y: 0.48 }
+        ]
+      }
+    ];
+  }
+
+  function loadDefaultQuarterMotif() {
+    state.quarter.sourceType = 'draw';
+    state.quarter.strokes = [
+      {
+        color: '#1e3a8a',
+        size: 6,
+        points: [
+          { x: 0.16, y: 0.82 },
+          { x: 0.22, y: 0.45 },
+          { x: 0.48, y: 0.22 },
+          { x: 0.80, y: 0.28 },
+          { x: 0.65, y: 0.56 }
+        ]
+      },
+      {
+        color: '#be123c',
+        size: 10,
+        points: [{ x: 0.32, y: 0.72 }]
+      }
+    ];
+  }
+
+  quarterTileCanvas.addEventListener('pointerdown', (e) => {
+    if (state.quarter.sourceType === 'photo') return;
+    quarterTileCanvas.setPointerCapture(e.pointerId);
+    state.quarter.isDrawing = true;
+    const { x, y } = quarterNorm(e);
+    if (state.quarter.tool === 'fill') {
+      state.quarter.isDrawing = false;
+      state.quarter.strokes.push({ tool: 'fill', color: state.quarter.color, size: 1, points: [{ x, y }] });
+      renderQuarterTileEditor();
+      renderQuarterOutput();
+      return;
+    }
+    state.quarter.currentStroke = {
+      tool: state.quarter.tool,
+      fill: state.quarter.fillShapes,
+      color: state.quarter.color,
+      size: state.quarter.size,
+      points: [{ x, y }]
+    };
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  quarterTileCanvas.addEventListener('pointermove', (e) => {
+    if (!state.quarter.isDrawing || !state.quarter.currentStroke) return;
+    const { x, y } = quarterNorm(e);
+    const cs = state.quarter.currentStroke;
+    if (cs.tool === 'brush') cs.points.push({ x, y });
+    else cs.points = [cs.points[0], { x, y }];
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  quarterTileCanvas.addEventListener('pointerup', (e) => {
+    if (!state.quarter.isDrawing) return;
+    state.quarter.isDrawing = false;
+    try { quarterTileCanvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    if (state.quarter.currentStroke) {
+      state.quarter.strokes.push(state.quarter.currentStroke);
+      state.quarter.currentStroke = null;
+      renderQuarterTileEditor();
+      renderQuarterOutput();
+    }
+  });
+
+  function loadQuarterPhotoFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        state.quarter.photoImg = img;
+        state.quarter.sourceType = 'photo';
+        state.quarter.photoRot90 = 0;
+        state.quarter.photoFlipX = false;
+        state.quarter.photoZoom = 1.0;
+        document.getElementById('qPhotoZoomSlider').value = 100;
+        document.getElementById('qPhotoZoomVal').textContent = '100%';
+        document.getElementById('quarterPhotoControls').style.display = 'block';
+        document.getElementById('quarterDrawTools').style.display = 'none';
+        renderQuarterTileEditor();
+        renderQuarterOutput();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('quarterPhotoUpload').addEventListener('change', (e) => {
+    loadQuarterPhotoFile(e.target.files[0]);
+  });
+
+  document.getElementById('quarterTileStage').addEventListener('dragover', (e) => e.preventDefault());
+  document.getElementById('quarterTileStage').addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      loadQuarterPhotoFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  document.getElementById('qRotateTileBtn').addEventListener('click', () => {
+    state.quarter.photoRot90 = (state.quarter.photoRot90 + 90) % 360;
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qFlipTileBtn').addEventListener('click', () => {
+    state.quarter.photoFlipX = !state.quarter.photoFlipX;
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qPhotoZoomSlider').addEventListener('input', (e) => {
+    const pct = parseInt(e.target.value, 10);
+    state.quarter.photoZoom = pct / 100;
+    document.getElementById('qPhotoZoomVal').textContent = pct + '%';
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qClearPhotoBtn').addEventListener('click', () => {
+    state.quarter.sourceType = 'draw';
+    document.getElementById('quarterPhotoUpload').value = '';
+    document.getElementById('quarterPhotoControls').style.display = 'none';
+    document.getElementById('quarterDrawTools').style.display = 'block';
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.querySelectorAll('#qColorSwatches .swatch').forEach((sw) => {
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('#qColorSwatches .swatch').forEach((s) => s.classList.remove('active'));
+      sw.classList.add('active');
+      state.quarter.color = sw.dataset.color;
+      document.getElementById('qCustomColor').value = sw.dataset.color;
+    });
+  });
+
+  document.querySelectorAll('#qToolRow [data-qtool]').forEach((b) => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#qToolRow [data-qtool]').forEach((o) => o.classList.remove('active-pill'));
+      b.classList.add('active-pill');
+      state.quarter.tool = b.dataset.qtool;
+    });
+  });
+  document.getElementById('qFillShapes').addEventListener('change', (e) => { state.quarter.fillShapes = e.target.checked; });
+  document.getElementById('qSizeSlider').addEventListener('input', (e) => { state.quarter.size = parseInt(e.target.value, 10); });
+  document.getElementById('qCustomColor').addEventListener('input', (e) => {
+    state.quarter.color = e.target.value;
+    document.querySelectorAll('#qColorSwatches .swatch').forEach((s) => s.classList.remove('active'));
+  });
+
+  document.getElementById('qLetterFBtn').addEventListener('click', () => {
+    loadLetterFMotif();
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qSampleMotifBtn').addEventListener('click', () => {
+    loadDefaultQuarterMotif();
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qUndoBtn').addEventListener('click', () => {
+    state.quarter.strokes.pop();
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qClearBtn').addEventListener('click', () => {
+    state.quarter.strokes = [];
+    renderQuarterTileEditor();
+    renderQuarterOutput();
+  });
+
+  document.querySelectorAll('#quarterGroupSelector .group-option').forEach((opt) => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('#quarterGroupSelector .group-option').forEach((o) => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      state.quarter.group = opt.dataset.group;
+      renderQuarterOutput();
+    });
+  });
+
+  document.getElementById('qShowRectGridCheck').addEventListener('change', (e) => {
+    state.quarter.showRectGrid = e.target.checked;
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qViewSingleBtn').addEventListener('click', () => {
+    state.quarter.viewMode = 'single';
+    document.getElementById('qViewSingleBtn').classList.add('active-pill');
+    document.getElementById('qViewAll7Btn').classList.remove('active-pill');
+    document.getElementById('quarterSinglePanel').style.display = 'block';
+    document.getElementById('quarterAll7Panel').style.display = 'none';
+    resizeAllCanvases();
+  });
+
+  document.getElementById('qViewAll7Btn').addEventListener('click', () => {
+    state.quarter.viewMode = 'all7';
+    document.getElementById('qViewAll7Btn').classList.add('active-pill');
+    document.getElementById('qViewSingleBtn').classList.remove('active-pill');
+    document.getElementById('quarterSinglePanel').style.display = 'none';
+    document.getElementById('quarterAll7Panel').style.display = 'block';
+    renderQuarterOutput();
+  });
+
+  document.getElementById('qSendToAnalyzerBtn').addEventListener('click', () => {
+    launchQuarterPatternInAnalyzer(state.quarter.group);
+  });
+
+  document.getElementById('qDownloadPngBtn').addEventListener('click', () => {
+    const prev = state.quarter.showRectGrid;
+    state.quarter.showRectGrid = false;
+    renderQuarterOutput();
+    const link = document.createElement('a');
+    link.download = `frieze-${state.quarter.group}.png`;
+    link.href = quarterOutputCanvas.toDataURL('image/png');
+    link.click();
+    state.quarter.showRectGrid = prev;
+    renderQuarterOutput();
+  });
+
+  /* ==========================================================================
+     18. TAB 3: CONTINUOUS FRIEZE SKETCHPAD
+     ========================================================================== */
+  function renderCreator() {
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = creatorCanvas.width / dpr;
+    const cssH = creatorCanvas.height / dpr;
+    const L = state.creator.period;
+    const yMid = cssH / 2;
+    const halfH = cssH * 0.42;
+    const groupCode = state.creator.group;
+    const groupObj = FRIEZE_GROUPS[groupCode];
+
+    creatorCtx.save();
+    creatorCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    creatorCtx.clearRect(0, 0, cssW, cssH);
+    creatorCtx.fillStyle = '#ffffff';
+    creatorCtx.fillRect(0, 0, cssW, cssH);
+
+    if (state.creator.showGuides) {
+      drawCreatorGuides(creatorCtx, cssW, cssH, yMid, halfH, L, groupCode);
+    }
+
+    const allStrokes = state.creator.currentStroke
+      ? [...state.creator.strokes, state.creator.currentStroke]
+      : state.creator.strokes;
+
+    renderStrokesWithSymmetry(
+      creatorCtx,
+      -1,
+      Math.ceil(cssW / L) + 1,
+      yMid,
+      halfH,
+      L,
+      groupObj,
+      allStrokes,
+      null
+    );
+
+    creatorCtx.restore();
+  }
+
+  function drawCreatorGuides(ctx, cssW, cssH, yMid, halfH, L, groupCode) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(5, 150, 105, 0.08)';
+    if (groupCode === 'p1') ctx.fillRect(0, yMid - halfH, L, halfH * 2);
+    else if (groupCode === 'p11m') ctx.fillRect(0, yMid - halfH, L, halfH);
+    else if (groupCode === 'p11g' || groupCode === 'p1m1' || groupCode === 'p2') ctx.fillRect(0, yMid - halfH, L / 2, halfH * 2);
+    else if (groupCode === 'p2mm') ctx.fillRect(0, yMid - halfH, L / 2, halfH);
+    else if (groupCode === 'p2mg') ctx.fillRect(0, yMid - halfH, L / 4, halfH * 2);
+
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= cssW; x += L) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, cssH);
+      ctx.stroke();
+    }
+
+    if (groupCode === 'p11m' || groupCode === 'p2mm') {
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, yMid);
+      ctx.lineTo(cssW, yMid);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    if (groupCode === 'p11g' || groupCode === 'p2mg') {
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, yMid);
+      ctx.lineTo(cssW, yMid);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    if (groupCode === 'p1m1' || groupCode === 'p2mg' || groupCode === 'p2mm') {
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      for (let x = 0; x <= cssW; x += L / 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, cssH);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+
+    if (groupCode === 'p2' || groupCode === 'p2mm' || groupCode === 'p2mg') {
+      const startOffset = groupCode === 'p2mg' ? L / 4 : 0;
+      ctx.fillStyle = '#e11d48';
+      for (let x = startOffset; x <= cssW + L; x += L / 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, yMid - 7);
+        ctx.lineTo(x + 7, yMid);
+        ctx.lineTo(x, yMid + 7);
+        ctx.lineTo(x - 7, yMid);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function updateCreatorInfo() {
+    const g = FRIEZE_GROUPS[state.creator.group];
+    document.getElementById('creatorGroupInfo').textContent = `Active: ${g.code} (${g.name})`;
+  }
+
+  function creatorPointFromEvent(e) {
+    const rect = creatorCanvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = creatorCanvas.width / dpr;
+    const cssH = creatorCanvas.height / dpr;
+    const x = (e.clientX - rect.left) * (cssW / rect.width);
+    const y = (e.clientY - rect.top) * (cssH / rect.height);
+    const halfH = cssH * 0.42;
+    const v = Math.max(-1, Math.min(1, (cssH / 2 - y) / halfH));
+    return { u: x / state.creator.period, v };
+  }
+
+  creatorCanvas.style.touchAction = 'none';
+
+  creatorCanvas.addEventListener('pointerdown', (e) => {
+    creatorCanvas.setPointerCapture(e.pointerId);
+    state.creator.isDrawing = true;
+    const pt = creatorPointFromEvent(e);
+    state.creator.currentStroke = {
+      tool: state.creator.tool,
+      color: state.creator.color,
+      size: state.creator.brushSize,
+      points: [pt]
+    };
+    renderCreator();
+  });
+
+  creatorCanvas.addEventListener('pointermove', (e) => {
+    if (!state.creator.isDrawing || !state.creator.currentStroke) return;
+    const pt = creatorPointFromEvent(e);
+    const stroke = state.creator.currentStroke;
+    if (stroke.tool === 'brush') {
+      stroke.points.push(pt);
+    } else {
+      stroke.points = [stroke.points[0], pt];
+    }
+    renderCreator();
+  });
+
+  function finishCreatorStroke(e) {
+    if (!state.creator.isDrawing) return;
+    state.creator.isDrawing = false;
+    try { creatorCanvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    if (state.creator.currentStroke) {
+      state.creator.strokes.push(state.creator.currentStroke);
+      state.creator.currentStroke = null;
+    }
+    renderCreator();
+  }
+  creatorCanvas.addEventListener('pointerup', finishCreatorStroke);
+  creatorCanvas.addEventListener('pointercancel', finishCreatorStroke);
+
+  document.querySelectorAll('#creatorGroupSelector .group-option').forEach((opt) => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('#creatorGroupSelector .group-option').forEach((o) => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      state.creator.group = opt.dataset.group;
+      updateCreatorInfo();
+      renderCreator();
+    });
+  });
+
+  document.querySelectorAll('.tool-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tool-btn').forEach((b) => b.classList.remove('active-pill'));
+      btn.classList.add('active-pill');
+      state.creator.tool = btn.dataset.tool;
+    });
+  });
+
+  document.querySelectorAll('#colorSwatches .swatch').forEach((sw) => {
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('#colorSwatches .swatch').forEach((s) => s.classList.remove('active'));
+      sw.classList.add('active');
+      state.creator.color = sw.dataset.color;
+    });
+  });
+
+  document.getElementById('brushSizeSlider').addEventListener('input', (e) => {
+    state.creator.brushSize = parseInt(e.target.value, 10);
+  });
+
+  document.getElementById('showGuidesCheck').addEventListener('change', (e) => {
+    state.creator.showGuides = e.target.checked;
+    renderCreator();
+  });
+
+  document.getElementById('undoStrokeBtn').addEventListener('click', () => {
+    state.creator.strokes.pop();
+    renderCreator();
+  });
+
+  document.getElementById('clearCanvasBtn').addEventListener('click', () => {
+    state.creator.strokes = [];
+    state.creator.currentStroke = null;
+    renderCreator();
+  });
+
+  document.getElementById('sendToAnalyzerBtn').addEventListener('click', () => {
+    if (state.creator.strokes.length === 0) {
+      document.getElementById('creatorGroupInfo').textContent = 'Draw something first, then send it to the Analyser!';
+      return;
+    }
+    state.analyzer.sourceMode = 'custom';
+    state.analyzer.isMystery = false;
+    state.analyzer.period = state.creator.period;
+    state.analyzer.yMid = ANALYZER_H / 2;
+    state.analyzer.manualOffsetX = 0;
+    state.analyzer.progress = 0;
+    state.analyzer.markedSymmetries = [];
+    state.analyzer.isSnapped = false;
+    document.getElementById('photoCalibrationWizard').classList.remove('visible');
+    setCalibrationStep('analyze');
+    resetChecklist();
+    updateMarkedCountUI();
+    syncScrubberUI();
+    updateAnalyzerBadge();
+    switchTab('analyzer');
+    rebuildAnalyzerBuffers();
+    renderAnalyzer();
+  });
+
+  document.getElementById('downloadPngBtn').addEventListener('click', () => {
+    const prev = state.creator.showGuides;
+    state.creator.showGuides = false;
+    renderCreator();
+    const link = document.createElement('a');
+    link.download = `sketchpad-frieze-${state.creator.group}.png`;
+    link.href = creatorCanvas.toDataURL('image/png');
+    link.click();
+    state.creator.showGuides = prev;
+    renderCreator();
+  });
+
+  /* ==========================================================================
+     19. TAB SWITCHING
+     ========================================================================== */
+  function switchTab(name) {
+    if (state.activeTab === 'analyzer' && name !== 'analyzer') pauseAnimation();
+    state.activeTab = name;
+    document.querySelectorAll('nav.tabs button').forEach((b) => {
+      b.classList.toggle('active', b.dataset.tab === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach((p) => {
+      p.classList.toggle('active', p.id === 'tab-' + name);
+    });
+    resizeAllCanvases();
+  }
+
+  document.querySelectorAll('nav.tabs button').forEach((btn) => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  /* ==========================================================================
+     20. TAB 4: MYSTERY LAB
+     ========================================================================== */
+  function updateScoreBadge() {
+    document.getElementById('challengeScoreBadge').textContent =
+      `Score: ${state.lab.score} / ${state.lab.attempts}`;
+  }
+
+  document.getElementById('launchChallengeBtn').addEventListener('click', () => {
+    loadRandomMystery();
+    document.getElementById('challengeGuessSelect').value = '';
+    const fb = document.getElementById('challengeFeedback');
+    fb.style.display = 'none';
+    fb.textContent = '';
+    switchTab('analyzer');
+  });
+
+  document.getElementById('submitGuessBtn').addEventListener('click', () => {
+    const fb = document.getElementById('challengeFeedback');
+    const guess = document.getElementById('challengeGuessSelect').value;
+    fb.style.display = 'block';
+
+    if (!state.analyzer.isMystery) {
+      fb.className = 'deduction-box';
+      fb.innerHTML = 'Load a Mystery Pattern in the Analyser first, using the button above.';
+      return;
+    }
+    if (!guess) {
+      fb.className = 'deduction-box';
+      fb.innerHTML = 'Pick a Frieze group from the drop-down first.';
+      return;
+    }
+    if (state.lab.solvedCurrent) {
+      fb.className = 'deduction-box match';
+      fb.innerHTML = 'You already solved this one! Load a new Mystery Pattern to keep playing.';
+      return;
+    }
+
+    const answer = state.analyzer.mysteryGroup;
+    state.lab.attempts++;
+    if (guess === answer) {
+      state.lab.score++;
+      state.lab.solvedCurrent = true;
+      const g = FRIEZE_GROUPS[answer];
+      fb.className = 'deduction-box match';
+      fb.innerHTML = `<strong>Correct!</strong> It is <code>${g.code}</code> (${g.name}): ${g.desc}.`;
+    } else {
+      fb.className = 'deduction-box invalid';
+      fb.innerHTML = '<strong>Not quite.</strong> Go back to the Analyser and test each symmetry again, then try another guess.';
+    }
+    updateScoreBadge();
+  });
+
+  /* ==========================================================================
+     21. INITIALISATION
+     ========================================================================== */
+  loadDefaultQuarterMotif();
+  refreshSavedPatternsUI();
+  updateCreatorInfo();
+  updateScoreBadge();
+  updateAnalyzerBadge();
+  resetChecklist();
+  updateMarkedCountUI();
+  syncScrubberUI();
+  resizeAllCanvases();
+  window.addEventListener('load', resizeAllCanvases);
+})();
+</script>
+<script src="https://nugget-maths.co.nz/notice.js" defer></script>
+</body>
+</html>
