@@ -377,11 +377,6 @@
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .canvas-stage.snapped {
-      border-color: var(--success);
-      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
-    }
-
     .canvas-stage.draggable {
       cursor: grab;
     }
@@ -1035,7 +1030,6 @@
       <div class="card-header">
         <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
           <h2>Activity 2: Upload a Frieze Photo &amp; Analyse Its Symmetries</h2>
-          <span id="snapStatusBadge" class="badge success" style="display:none;">&#129522; Snapped to Symmetry!</span>
         </div>
         <span id="analyzerPatternBadge" class="badge">Built-in: p11g (Step)</span>
       </div>
@@ -1235,9 +1229,9 @@
         </div>
 
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.65rem;">
-          <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.3rem; cursor:pointer;" title="Symmetry lines click into place like a magnet when close to a true symmetry">
+          <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.3rem; cursor:pointer;" title="When you release a line or centre that is only a few pixels off a true symmetry, it is nudged onto it. It never tells you whether it works: you still have to test and pin it.">
             <input type="checkbox" id="magneticSnapCheck" checked />
-            &#129522; Magnetic Snap
+            Gentle snap
           </label>
           <label style="font-size:0.79rem; display:flex; align-items:center; gap:0.3rem; cursor:pointer;">
             <input type="checkbox" id="tintOverlayCheck" checked />
@@ -1273,7 +1267,7 @@
       <div id="analyzerAxisHint" class="canvas-hint" style="margin-top:0.6rem;">
         <div>
           <strong id="liveReadoutLabel">Overlay Position:</strong>
-          <span id="liveReadoutText">Drag the transparent copy left or right (or use &larr; / &rarr; arrow keys); lines snap near true symmetries.</span>
+          <span id="liveReadoutText">Drag the transparent copy left or right (or use &larr; / &rarr; arrow keys); </span>
         </div>
         <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
           <button class="btn sm" id="nudgeCopyLeftBtn" title="Nudge copy left (Left Arrow)">&#9664; -2px</button>
@@ -1873,8 +1867,6 @@
       tintOverlay: true,
       overlayOpacity: 0.60,
       magneticSnap: true,
-      isSnapped: false,
-      snapMessage: '',
 
       // Pointer drag state on analyzerCanvas
       dragTarget: null,
@@ -2577,7 +2569,6 @@
     state.analyzer.manualOffsetX = 0;
     state.analyzer.progress = 0;
     state.analyzer.markedSymmetries = [];
-    state.analyzer.isSnapped = false;
     document.getElementById('photoCalibrationWizard').classList.remove('visible');
     resetChecklist();
     updateMarkedCountUI();
@@ -3036,125 +3027,81 @@
     return count > 30 ? sumDiff / count : Infinity;
   }
 
-  function applyMagneticSnap(cssW) {
-    const prevSnapped = state.analyzer.isSnapped;
-    state.analyzer.isSnapped = false;
-    state.analyzer.snapMessage = '';
+  /* Subtle "intent" snap. Runs once, when the user releases the pointer after
+     drawing. It only nudges a drawing that is already within a few pixels of a
+     true symmetry, and gives NO feedback (no colour change, badge, label or
+     sound), so it cannot reveal whether the symmetry is correct. The user must
+     still press "Test it" and then pin the symmetry explicitly. */
+  const SNAP_TOL = { shift: 6, axis: 6, midline: 5 };
 
-    if (!state.analyzer.magneticSnap || state.analyzer.progress < 0.92) {
-      updateSnapBadgeUI();
-      return;
-    }
+  function snapDrawnElement() {
+    const a = state.analyzer;
+    if (!a.magneticSnap || !a.drawn) return;
+    if (a.sourceMode === 'photo' && a.calStep !== 'analyze') return;
 
-    const L = state.analyzer.period;
-    const tType = state.analyzer.transform;
-    const baseX0 = state.analyzer.baseAxisFrac * L;
+    const L = a.period;
+    const tType = a.transform;
+    const baseX0 = a.baseAxisFrac * L;
     const groupCode = getActiveKnownGroupCode();
 
+    // Midline (horizontal axis / rotation-centre height): tiny pull towards the midline.
+    if (a.drawnY != null && Math.abs(a.drawnY - a.yMid) <= SNAP_TOL.midline) {
+      a.drawnY = a.yMid;
+    }
+
     if (groupCode && FRIEZE_GROUPS[groupCode]) {
-      const g = FRIEZE_GROUPS[groupCode];
-      const sym = g.symmetries;
+      const sym = FRIEZE_GROUPS[groupCode].symmetries;
 
       if (tType === 'T') {
-        const curShift = L + state.analyzer.manualOffsetX;
+        const curShift = L + a.manualOffsetX;
         const nearestShift = Math.round(curShift / L) * L;
-        if (Math.abs(curShift - nearestShift) <= 14) {
-          state.analyzer.manualOffsetX = nearestShift - L;
-          state.analyzer.isSnapped = true;
-          state.analyzer.snapMessage = `\ud83e\uddf2 Snapped to Translation (${Math.round(nearestShift / L)}L)`;
-        }
-      } else if (tType === 'H' && sym.H) {
-        if (state.analyzer.drawn && Math.abs(axisY() - state.analyzer.yMid) <= 12) {
-          state.analyzer.drawnY = state.analyzer.yMid;
-          state.analyzer.isSnapped = true;
-          state.analyzer.snapMessage = '\ud83e\uddf2 Snapped to Horizontal Mirror Line';
+        if (nearestShift !== 0 && Math.abs(curShift - nearestShift) <= SNAP_TOL.shift) {
+          a.manualOffsetX = nearestShift - L;
         }
       } else if (tType === 'V' && sym.V) {
-        const curX0 = baseX0 + state.analyzer.manualOffsetX / 2;
+        const curX0 = baseX0 + a.manualOffsetX / 2;
         const halfL = L / 2;
         const nearestX0 = Math.round(curX0 / halfL) * halfL;
-        if (Math.abs(curX0 - nearestX0) <= 12) {
-          state.analyzer.manualOffsetX = (nearestX0 - baseX0) * 2;
-          state.analyzer.isSnapped = true;
-          state.analyzer.snapMessage = `\ud83e\uddf2 Snapped to Vertical Mirror Line (x\u2080 = ${Math.round(nearestX0)}px)`;
+        if (Math.abs(curX0 - nearestX0) <= SNAP_TOL.axis) {
+          a.manualOffsetX = (nearestX0 - baseX0) * 2;
         }
       } else if (tType === 'R' && sym.R) {
-        const curX0 = baseX0 + state.analyzer.manualOffsetX / 2;
+        const curX0 = baseX0 + a.manualOffsetX / 2;
         let nearestX0;
         if (groupCode === 'p2mg') {
           nearestX0 = (Math.round((curX0 - L * 0.25) / (L / 2)) * (L / 2)) + L * 0.25;
         } else {
           nearestX0 = Math.round(curX0 / (L / 2)) * (L / 2);
         }
-        if (Math.abs(curX0 - nearestX0) <= 12) {
-          state.analyzer.manualOffsetX = (nearestX0 - baseX0) * 2;
-          state.analyzer.isSnapped = true;
-          state.analyzer.snapMessage = `\ud83e\uddf2 Snapped to 180\u00b0 Rotation Centre (x\u2080 = ${Math.round(nearestX0)}px)`;
+        if (Math.abs(curX0 - nearestX0) <= SNAP_TOL.axis) {
+          a.manualOffsetX = (nearestX0 - baseX0) * 2;
         }
       } else if (tType === 'G' && (sym.G || sym.H)) {
         const off = sym.G ? L / 2 : 0;
-        const curTotalShift = L / 2 + state.analyzer.manualOffsetX;
+        const curTotalShift = L / 2 + a.manualOffsetX;
         const k = Math.round((curTotalShift - off) / L);
         const nearestShift = k * L + off;
-        if ((sym.G || k !== 0) && Math.abs(curTotalShift - nearestShift) <= 14) {
-          state.analyzer.manualOffsetX = nearestShift - L / 2;
-          state.analyzer.isSnapped = true;
-          state.analyzer.snapMessage = sym.G ? '\ud83e\uddf2 Snapped to True Glide Reflection' : '\ud83e\uddf2 Snapped to Mirror + Translation (not a true glide)';
+        if ((sym.G || k !== 0) && Math.abs(curTotalShift - nearestShift) <= SNAP_TOL.shift) {
+          a.manualOffsetX = nearestShift - L / 2;
         }
       }
-    } else if (state.analyzer.photoGrayGrid) {
-      const centerManualX = state.analyzer.manualOffsetX;
-      let bestOffset = centerManualX;
-      let bestErr = Infinity;
-      let sumErr = 0;
-      let samples = 0;
-
-      for (let d = -14; d <= 14; d += 1) {
+    } else if (a.photoGrayGrid && tType !== 'H') {
+      // Photos: only snap when a clearly better alignment exists within a few pixels.
+      const centerManualX = a.manualOffsetX;
+      let bestOffset = centerManualX, bestErr = Infinity, sumErr = 0, samples = 0;
+      for (let d = -SNAP_TOL.shift; d <= SNAP_TOL.shift; d += 1) {
         const cand = Math.round(centerManualX) + d;
         const err = evaluatePhotoAlignmentError(tType, cand, baseX0);
         if (isFinite(err)) {
           sumErr += err;
           samples++;
-          if (err < bestErr) {
-            bestErr = err;
-            bestOffset = cand;
-          }
+          if (err < bestErr) { bestErr = err; bestOffset = cand; }
         }
       }
-
       if (samples > 5) {
         const avgErr = sumErr / samples;
-        if (bestErr < 34 && bestErr < avgErr * 0.72) {
-          state.analyzer.manualOffsetX = bestOffset;
-          state.analyzer.isSnapped = true;
-          const labels = {
-            T: '\ud83e\uddf2 Snapped to Translation Match',
-            H: '\ud83e\uddf2 Snapped to Horizontal Mirror Line',
-            V: '\ud83e\uddf2 Snapped to Vertical Mirror Line',
-            R: '\ud83e\uddf2 Snapped to 180\u00b0 Rotation Centre',
-            G: '\ud83e\uddf2 Snapped to Glide Reflection Match'
-          };
-          state.analyzer.snapMessage = labels[tType] || '\ud83e\uddf2 Snapped to Symmetry';
-        }
+        if (bestErr < 30 && bestErr < avgErr * 0.8) a.manualOffsetX = bestOffset;
       }
-    }
-
-    if (state.analyzer.isSnapped && !prevSnapped) {
-      playMagneticClickSound();
-    }
-    updateSnapBadgeUI();
-  }
-
-  function updateSnapBadgeUI() {
-    const badge = document.getElementById('snapStatusBadge');
-    const stage = document.getElementById('analyzerStage');
-    if (state.analyzer.isSnapped) {
-      badge.style.display = 'inline-flex';
-      badge.textContent = state.analyzer.snapMessage;
-      stage.classList.add('snapped');
-    } else {
-      badge.style.display = 'none';
-      stage.classList.remove('snapped');
     }
   }
 
@@ -3382,7 +3329,6 @@
     // ------------------------------------------------------------------------
     if (state.analyzer.sourceMode === 'photo' && state.analyzer.calStep !== 'analyze') {
       const step = state.analyzer.calStep;
-      updateSnapBadgeUI();
 
       if (step === 'perspective') {
         drawPerspectiveQuadEditor(analyzerCtx, cssW, cssH);
@@ -3508,9 +3454,6 @@
     // ------------------------------------------------------------------------
     // CASE 2: FULL SYMMETRY ANALYSIS MODE WITH MAGNETIC SNAPPING
     // ------------------------------------------------------------------------
-    applyMagneticSnap(cssW);
-    const isSnapped = state.analyzer.isSnapped;
-
     const tileHighlightX = state.analyzer.sourceMode === 'photo' ? state.analyzer.photoTileLeft : 0;
     analyzerCtx.fillStyle = 'rgba(37, 99, 235, 0.035)';
     analyzerCtx.fillRect(tileHighlightX, 0, L, cssH);
@@ -3545,14 +3488,13 @@
       drawMarkedSymmetries(analyzerCtx, cssW, cssH);
     }
 
-    const activeAxisColor = isSnapped ? '#059669' : '#2563eb';
+    const activeAxisColor = '#2563eb';
 
     if (state.analyzer.drawn && (geom.type === 'H' || geom.type === 'G')) {
       analyzerCtx.save();
-      if (isSnapped) { analyzerCtx.shadowColor = 'rgba(5, 150, 105, 0.55)'; analyzerCtx.shadowBlur = 10; }
       analyzerCtx.strokeStyle = activeAxisColor;
-      analyzerCtx.lineWidth = isSnapped ? 3.2 : 2;
-      analyzerCtx.setLineDash(isSnapped ? [] : [7, 5]);
+      analyzerCtx.lineWidth = 2;
+      analyzerCtx.setLineDash([7, 5]);
       analyzerCtx.beginPath();
       analyzerCtx.moveTo(0, geom.y);
       analyzerCtx.lineTo(cssW, geom.y);
@@ -3564,7 +3506,7 @@
       const D = L * (geom.type === 'T' ? 1 : 0.5) + state.analyzer.manualOffsetX;
       const x1 = state.analyzer.vecX0, x2 = x1 + D, ay = axisY(), dir = D >= 0 ? 1 : -1;
       analyzerCtx.save();
-      analyzerCtx.strokeStyle = analyzerCtx.fillStyle = isSnapped ? '#059669' : '#b45309';
+      analyzerCtx.strokeStyle = analyzerCtx.fillStyle = '#b45309';
       analyzerCtx.lineWidth = 4;
       analyzerCtx.beginPath(); analyzerCtx.moveTo(x1, ay); analyzerCtx.lineTo(x2, ay); analyzerCtx.stroke();
       analyzerCtx.beginPath(); analyzerCtx.arc(x1, ay, 5, 0, Math.PI * 2); analyzerCtx.fill();
@@ -3578,13 +3520,9 @@
       analyzerCtx.save();
       const x0 = geom.x0;
 
-      if (isSnapped) {
-        analyzerCtx.shadowColor = 'rgba(5, 150, 105, 0.55)';
-        analyzerCtx.shadowBlur = 10;
-      }
       analyzerCtx.strokeStyle = activeAxisColor;
-      analyzerCtx.lineWidth = isSnapped ? 3.2 : 2.2;
-      analyzerCtx.setLineDash(isSnapped ? [] : [7, 4]);
+      analyzerCtx.lineWidth = 2.2;
+      analyzerCtx.setLineDash([7, 4]);
       analyzerCtx.beginPath();
       analyzerCtx.moveTo(x0, 0);
       analyzerCtx.lineTo(x0, cssH);
@@ -3593,14 +3531,7 @@
       analyzerCtx.shadowBlur = 0;
 
       if (geom.type === 'R') {
-        if (isSnapped) {
-          analyzerCtx.strokeStyle = 'rgba(5, 150, 105, 0.45)';
-          analyzerCtx.lineWidth = 3;
-          analyzerCtx.beginPath();
-          analyzerCtx.arc(x0, geom.y, 16, 0, Math.PI * 2);
-          analyzerCtx.stroke();
-        }
-        analyzerCtx.fillStyle = isSnapped ? '#059669' : '#e11d48';
+        analyzerCtx.fillStyle = '#e11d48';
         analyzerCtx.strokeStyle = '#ffffff';
         analyzerCtx.lineWidth = 2;
         analyzerCtx.beginPath();
@@ -3621,7 +3552,7 @@
       analyzerCtx.fillStyle = '#ffffff';
       analyzerCtx.font = 'bold 11px sans-serif';
       analyzerCtx.textAlign = 'center';
-      analyzerCtx.fillText(isSnapped ? '\ud83e\uddf2 LOCKED' : '\u2194 x\u2080', clampedHandleX, 17.5);
+      analyzerCtx.fillText('\u2194 x\u2080', clampedHandleX, 17.5);
       analyzerCtx.restore();
     }
 
@@ -3636,28 +3567,27 @@
       textEl.textContent = TOOL_HINT[state.analyzer.transform];
       return;
     }
-    const snapNote = state.analyzer.isSnapped ? ' \u2014 \ud83e\uddf2 Clicked into place! Press Space to pin.' : '';
 
     if (geom.type === 'T') {
       labelEl.textContent = 'Translation Shift:';
-      textEl.textContent = `${Math.round(geom.totalShiftX)} px (${(geom.totalShiftX / L).toFixed(2)} L)${snapNote}`;
+      textEl.textContent = `${Math.round(geom.totalShiftX)} px (${(geom.totalShiftX / L).toFixed(2)} L)`;
     } else if (geom.type === 'H') {
       labelEl.textContent = 'Horizontal Mirror:';
-      textEl.textContent = `Midline y = ${Math.round(state.analyzer.yMid)} px (shift ${Math.round(geom.manualOffsetX)} px)${snapNote}`;
+      textEl.textContent = `Midline y = ${Math.round(state.analyzer.yMid)} px (shift ${Math.round(geom.manualOffsetX)} px)`;
     } else if (geom.type === 'V') {
       labelEl.textContent = 'Vertical Mirror Axis:';
-      textEl.textContent = `x\u2080 = ${Math.round(geom.x0)} px${snapNote || ' \u2014 drag near a vertical mirror line to snap.'}`;
+      textEl.textContent = `x\u2080 = ${Math.round(geom.x0)} px`;
     } else if (geom.type === 'R') {
       labelEl.textContent = '180\u00b0 Rotation Centre:';
-      textEl.textContent = `(x\u2080 = ${Math.round(geom.x0)} px, y = ${Math.round(state.analyzer.yMid)} px)${snapNote || ' \u2014 drag near a rotation center to snap.'}`;
+      textEl.textContent = `(x\u2080 = ${Math.round(geom.x0)} px, y = ${Math.round(state.analyzer.yMid)} px)`;
     } else if (geom.type === 'G') {
       labelEl.textContent = 'Glide Vector:';
-      textEl.textContent = `v = ${Math.round(geom.totalShiftX)} px (${(geom.totalShiftX / L).toFixed(2)} L) + midline flip${snapNote}`;
+      textEl.textContent = `v = ${Math.round(geom.totalShiftX)} px (${(geom.totalShiftX / L).toFixed(2)} L) + midline flip`;
     }
     if (state.analyzer.showOverlay && state.analyzer.progress >= 0.999) {
       const r = evaluateMatch(geom);
       textEl.textContent += r.works
-        ? ` \u2014 \u2705 It works! The copy lands on the pattern (${r.pct}% match). Press Space to pin it.`
+        ? ` \u2014 \u2705 It works! The copy lands on the pattern (${r.pct}% match). Press Space to pin it if you are sure.`
         : ` \u2014 \u274c Not a match (${r.pct}%). Move what you drew and test again.`;
       if (r.works && geom.type === 'G') {
         const k = glideKind(geom);
@@ -3681,7 +3611,7 @@
   function clearDrawn() {
     const a = state.analyzer;
     a.drawn = false; a.showOverlay = false; a.drawnY = null; a.manualOffsetX = 0;
-    a.baseAxisFrac = 0; a.progress = 0; a.isSnapped = false;
+    a.baseAxisFrac = 0; a.progress = 0;
   }
 
   function applyGeomTransform(ctx, g) {
@@ -3878,6 +3808,10 @@
       showToast('Draw a mirror line, rotation centre or glide vector on the pattern first, then test it.');
       return;
     }
+    if (!a.showOverlay || a.progress < 0.999) {
+      showToast('Press Test it first and watch the copy land, then pin the symmetry if it works.');
+      return;
+    }
     const dpr = window.devicePixelRatio || 1;
     const geom = computeActiveTransformGeometry(analyzerCanvas.width / dpr, 1);
     const res = evaluateMatch(geom);
@@ -4002,7 +3936,7 @@
   function drawSymmetryElement(px, py, start) {
     const a = state.analyzer, L = a.period, t = a.transform;
     a.drawn = true; a.showOverlay = false; a.progress = 1; a.baseAxisFrac = 0;
-    const yy = (a.magneticSnap && Math.abs(py - a.yMid) <= 10) ? a.yMid : py;
+    const yy = py;
     if (t === 'V') a.manualOffsetX = 2 * px;
     else if (t === 'H') a.drawnY = yy;
     else if (t === 'R') { a.manualOffsetX = 2 * px; a.drawnY = yy; }
@@ -4154,12 +4088,14 @@
 
   function releaseAnalyzerPointer(e) {
     if (state.analyzer.dragTarget) {
+      const wasDraw = state.analyzer.dragTarget === 'draw';
       const wasQuadDrag = state.analyzer.dragTarget.startsWith('corner:') ||
         state.analyzer.dragTarget.startsWith('edge:') ||
         state.analyzer.dragTarget === 'quadMove';
       state.analyzer.dragTarget = null;
       state.analyzer.quadActiveCorner = null;
       try { analyzerCanvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      if (wasDraw) { snapDrawnElement(); renderAnalyzer(); }
       if (wasQuadDrag) renderAnalyzer();
     }
   }
@@ -4641,7 +4577,6 @@
       state.analyzer.manualOffsetX = 0;
       state.analyzer.progress = 0;
       state.analyzer.markedSymmetries = [];
-      state.analyzer.isSnapped = false;
 
       document.getElementById('photoCalibrationWizard').classList.remove('visible');
       document.getElementById('patternSourceSelect').value = savedEntry.id;
